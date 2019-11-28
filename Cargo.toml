@@ -1,0 +1,25 @@
+[package]
+name = "liquid-dsp"
+version = "0.1.0"
+authors = ["Natanael Mojica neithanmo@gmail.com"]
+license = "MIT/Apache-2.0"
+readme = "README.md"
+keywords = ["dsp", "api-bindings"]
+repository = "https://github.com/neithanmo/liquid-dsp-rs"
+publish = true
+description = """
+Raw bindings to the Liquid-dsp
+High level Rust bindings are available in the `liquid-dsp` crate
+"""
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+liquid-dsp-sys = {path="liquid-sys", version="0.1.0"}
+libc = "*"
+bitflags = "1.0.4"
+num = "*"
+
+[dev-dependencies]
+
+

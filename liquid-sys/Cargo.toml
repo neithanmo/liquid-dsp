@@ -1,0 +1,17 @@
+
+[package]
+name = "liquid-dsp-sys"
+version = "0.1.0"
+authors = ["Natanael Mojica <neithanmo@gmail.com>"]
+edition = "2018"
+description = "Low-level C to Rust bindings for liquid-dsp"
+license = ""
+categories = ["external-ffi-bindings"]
+repository = "https://github.com/neithanmo/liquid-dsp-rs"
+links = "liquid"
+build= "build.rs"
+
+[build-dependencies]
+libc = "*"
+bindgen = "*"
+
