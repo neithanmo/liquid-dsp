@@ -4,10 +4,10 @@ use std::fmt;
 use num::complex::Complex32;
 use std::mem::transmute;
 
-use crate::enums::AgcSquelchMode;
+use crate::enums::{AgcSquelchMode};
 use crate::liquid_dsp_sys as raw;
 
-use crate::utils::{LiquidComplex, LiquidFloatComplex};
+use crate::utils::{LiquidFloatComplex};
 
 pub struct AgcCrcf {
     inner: raw::agc_crcf,
@@ -341,7 +341,7 @@ impl AgcRrrf {
 
 #[cfg(test)]
 mod tests {
-    use super::{AgcCrcf, AgcRrrf};
+    use super::{AgcCrcf};
     use num::complex::Complex32;
     use num::Zero;
 
@@ -374,25 +374,4 @@ mod tests {
         let rssi = agc.get_rssi();
         assert_eq!(0.016113421, rssi);    
     }
-
-   /* #[test]
-    fn test_agc_crcf_init() {
-        let mut input = Vec::with_capacity(4);
-        let mut output = vec![Complex32::zero(); 4];
-        let mut s = 0f32;
-        for i in 0..4 {
-            let val = Complex32::new(2.0 + i as f32 * 2.0, -2.8 * 0.5 * i as f32);
-            input.push(val);
-        }
-
-        let mut agc = AgcCrcf::create();
-        agc.init(&mut input);
-        agc.set_bandwidth(0.001).unwrap();
-        agc.set_gain(0.5).unwrap();
-        agc.set_scale(1.5).unwrap();
-        agc.squelch_enable(); 
-        println!("{:?}", agc);
-        assert_eq!(1, 1);  
-    }*/
-
 }
