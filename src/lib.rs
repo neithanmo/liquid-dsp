@@ -6,8 +6,12 @@ extern crate num;
 
 mod agc;
 mod autocorr;
+mod ampmodem;
+mod cvsd;
 mod enums;
 mod utils;
 pub use agc::AgcCrcf;
 pub use autocorr::{AutoCorrCccf, AutoCorrRrrf};
-pub use enums::AgcSquelchMode;
+pub use ampmodem::AmpModem;
+pub use cvsd::Cvsd;
+pub use enums::{AgcSquelchMode, AmpModemType};
