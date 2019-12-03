@@ -19,23 +19,62 @@ pub struct AutoCorrCccf {
     delay: u32,
 }
 
+macro_rules! autocorr_xxx_impl {
+    ($obj:ty, ($create:expr, $reset:expr,
+        $destroy:expr)) => {
+        impl $obj {
+            ///  creates and returns an autocorr object with a *window* size of N samples and a *delay* of d samples.
+            pub fn create(N: u32, d: u32) -> Self {
+                Self {
+                    inner: unsafe { $create(N, d) },
+                    window: N,
+                    delay: d,
+                }
+            }
+
+            pub fn reset(&mut self) {
+                unsafe {
+                    $reset(self.inner);
+                }
+            }
+        }
+
+        impl fmt::Debug for $obj {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, "autocorr [{} window, {} delay]", self.window, self.delay)
+            }
+        }
+
+        impl Drop for $obj {
+            fn drop(&mut self) {
+                unsafe {
+                    $destroy(self.inner);
+                }
+            }
+        }
+    };
+}
+
+autocorr_xxx_impl!(
+    AutoCorrCccf,
+    (
+        raw::autocorr_cccf_create,
+        raw::autocorr_cccf_reset,
+        raw::autocorr_cccf_destroy
+    )
+);
+
+autocorr_xxx_impl!(
+    AutoCorrRrrf,
+    (
+        raw::autocorr_rrrf_create,
+        raw::autocorr_rrrf_reset,
+        raw::autocorr_rrrf_destroy
+    )
+);
+
 impl AutoCorrCccf {
-    ///  creates and returns an autocorr object with a *window* size of N samples and a *delay* of d samples.
-    pub fn create(N: u32, d: u32) -> Self {
-        let inner = unsafe { raw::autocorr_cccf_create(N as c_uint, d as c_uint) };
-        Self {
-            inner,
-            window: N,
-            delay: d,
-        }
-    }
-
-    pub fn reset(&mut self) {
-        unsafe {
-            raw::autocorr_cccf_reset(self.inner);
-        }
-    }
-
+   
     pub fn push(&self, sample: Complex32) {
         unsafe {
             let complex = LiquidComplex::from(sample);
@@ -82,37 +121,9 @@ impl AutoCorrCccf {
     }
 }
 
-impl fmt::Debug for AutoCorrCccf {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "autocorr [{} window, {} delay]", self.window, self.delay)
-    }
-}
-
-impl Drop for AutoCorrCccf {
-    fn drop(&mut self) {
-        unsafe {
-            raw::autocorr_cccf_destroy(self.inner);
-        }
-    }
-}
 
 impl AutoCorrRrrf {
-    ///  creates and returns an autocorr object with a *window* size of N samples and a *delay* of d samples.
-    pub fn create(N: u32, d: u32) -> Self {
-        let inner = unsafe { raw::autocorr_rrrf_create(N as c_uint, d as c_uint) };
-        Self {
-            inner,
-            window: N,
-            delay: d,
-        }
-    }
-
-    pub fn reset(&mut self) {
-        unsafe {
-            raw::autocorr_rrrf_reset(self.inner);
-        }
-    }
-
+    
     pub fn push(&self, sample: f32) {
         unsafe {
             raw::autocorr_rrrf_push(self.inner, sample);
@@ -145,20 +156,6 @@ impl AutoCorrRrrf {
 
     pub fn get_energy(&self) -> f32 {
         unsafe { raw::autocorr_rrrf_get_energy(self.inner) as f32 }
-    }
-}
-
-impl fmt::Debug for AutoCorrRrrf {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "autocorr [{} window, {} delay]", self.window, self.delay)
-    }
-}
-
-impl Drop for AutoCorrRrrf {
-    fn drop(&mut self) {
-        unsafe {
-            raw::autocorr_rrrf_destroy(self.inner);
-        }
     }
 }
 
