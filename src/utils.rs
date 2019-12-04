@@ -1,30 +1,68 @@
 use num::complex::Complex32;
+use std::mem::transmute;
 
 use crate::liquid_dsp_sys as raw;
 
-pub(crate) trait ToRaw<T> {
-    unsafe fn to_raw(&mut self) -> *mut T;
-}
-
 pub(crate) type LiquidFloatComplex = raw::liquid_float_complex;
 
-#[derive(Debug, Clone)]
-pub(crate) struct LiquidComplex(pub(crate) LiquidFloatComplex);
-
-impl From<Complex32> for LiquidComplex {
-    fn from(value: Complex32) -> Self {
-        Self(LiquidFloatComplex {
-            re: value.re,
-            im: value.im,
-        })
-    }
+pub(crate) trait ToCPointer {
+    type Output;
+    fn to_ptr(&self) -> Self::Output;
 }
 
-impl From<LiquidComplex> for Complex32 {
-    fn from(value: LiquidComplex) -> Self {
-        Self {
-            re: value.0.re,
-            im: value.0.im,
+pub(crate) trait ToCPointerMut {
+    type Output;
+    fn to_ptr_mut(&mut self) -> Self::Output;
+}
+
+pub(crate) trait ToCValue {
+    type Output;
+    fn to_c_value(self) -> Self::Output;
+}
+
+impl ToCPointer for Complex32 {
+    type Output = *const LiquidFloatComplex;
+    fn to_ptr(&self) -> Self::Output {
+        unsafe {
+            transmute::<*const Complex32, *const LiquidFloatComplex>(self as *const _)
         }
     }
 }
+
+impl ToCPointerMut for Complex32 {
+    type Output = *mut LiquidFloatComplex;
+    fn to_ptr_mut(&mut self) -> Self::Output {
+        unsafe {
+            transmute::<*mut Complex32, *mut LiquidFloatComplex>(self as *mut _)
+        }
+    }
+}
+
+impl ToCPointer for [Complex32] {
+    type Output = *const LiquidFloatComplex;
+    fn to_ptr(&self) -> Self::Output {
+        unsafe {
+            transmute::<*const Complex32, *const LiquidFloatComplex>(self.as_ptr())
+        }
+    }
+}
+
+impl ToCPointerMut for [Complex32] {
+    type Output = *mut LiquidFloatComplex;
+    fn to_ptr_mut(&mut self) -> Self::Output {
+        unsafe {
+            transmute::<*mut Complex32, *mut LiquidFloatComplex>(self.as_mut_ptr())
+        }
+    }
+}
+
+impl ToCValue for Complex32 {
+    type Output = LiquidFloatComplex;
+    fn to_c_value(self) -> Self::Output {
+        LiquidFloatComplex {
+            re: self.re,
+            im: self.im,
+        }
+    }
+}
+

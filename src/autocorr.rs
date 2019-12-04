@@ -1,11 +1,9 @@
 use std::fmt;
-use std::mem::transmute;
 
 use crate::liquid_dsp_sys as raw;
-use libc::c_uint;
 use num::complex::Complex32;
 
-use crate::utils::{LiquidComplex, LiquidFloatComplex};
+use crate::utils::{ToCValue, ToCPointerMut};
 
 pub struct AutoCorrRrrf {
     inner: raw::autocorr_rrrf,
@@ -77,21 +75,18 @@ impl AutoCorrCccf {
    
     pub fn push(&self, sample: Complex32) {
         unsafe {
-            let complex = LiquidComplex::from(sample);
-            raw::autocorr_cccf_push(self.inner, complex.0);
+            raw::autocorr_cccf_push(self.inner, sample.to_c_value());
         }
     }
 
     pub fn execute(&self) -> Complex32 {
         unsafe {
             let mut out = Complex32::default();
-            let ptr = &mut out as *mut Complex32;
-            // this is safe because Complex<T> reproduce c
             raw::autocorr_cccf_execute(
                 self.inner,
-                transmute::<*mut Complex32, *mut LiquidFloatComplex>(ptr),
+                out.to_ptr_mut(),
             );
-            *ptr
+            out
         }
     }
 
@@ -108,9 +103,7 @@ impl AutoCorrCccf {
                 unsafe {
                     raw::autocorr_cccf_execute(
                         self.inner,
-                        transmute::<*mut Complex32, *mut LiquidFloatComplex>(
-                            osample as *mut Complex32,
-                        ),
+                        osample.to_ptr_mut()
                     );
                 }
             });

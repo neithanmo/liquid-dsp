@@ -2,12 +2,11 @@ use libc::c_uint;
 use std::fmt;
 
 use num::complex::Complex32;
-use std::mem::transmute;
 
 use crate::enums::{AgcSquelchMode};
 use crate::liquid_dsp_sys as raw;
 
-use crate::utils::{LiquidFloatComplex};
+use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 
 pub struct AgcCrcf {
     inner: raw::agc_crcf,
@@ -258,37 +257,33 @@ agc_xxx_impl!(
 );
 
 impl AgcCrcf {
-    pub fn init(&mut self, input: &mut [Complex32]) -> Result<(), &'static str> {
+    pub fn init(&mut self, input: &[Complex32]) -> Result<(), &'static str> {
         if input.len() == 0 {
             return Err("number of samples must be greater than zero");
         }
         unsafe {
             raw::agc_crcf_init(
                 self.inner,
-                transmute::<*mut Complex32, *mut LiquidFloatComplex>(input.as_mut_ptr()),
+                input.to_ptr() as *mut _,
                 input.len() as c_uint,
             );
         }
         Ok(())
     }
 
-    pub fn execute(&self, mut input: Complex32) -> Complex32 {
+    pub fn execute(&self, input: Complex32) -> Complex32 {
         let mut out = Complex32::default();
-        let ptr = &mut out as *mut Complex32;
         unsafe {
-            // this is safe because Complex<T> reproduce c
-            let inp =
-            transmute::<*mut Complex32, *mut LiquidFloatComplex>(&mut input as *mut Complex32);
             raw::agc_crcf_execute(
                 self.inner,
-                *inp,
-                transmute::<*mut Complex32, *mut LiquidFloatComplex>(ptr),
+                input.to_c_value(),
+                out.to_ptr_mut(),
             );
-            *ptr
+            out
         }
     }
 
-    pub fn execute_block(&self, input: &mut [Complex32], output: &mut [Complex32]) {
+    pub fn execute_block(&self, input: &[Complex32], output: &mut [Complex32]) {
         assert!(
             input.len() == output.len(),
             "Input and output buffers with different length"
@@ -296,9 +291,9 @@ impl AgcCrcf {
         unsafe {
             raw::agc_crcf_execute_block(
                 self.inner,
-                transmute::<*mut Complex32, *mut LiquidFloatComplex>(input.as_mut_ptr()),
+                input.to_ptr() as *mut _,
                 input.len() as c_uint,
-                transmute::<*mut Complex32, *mut LiquidFloatComplex>(output.as_mut_ptr()),
+                output.to_ptr_mut(),
             );
         }
     }
@@ -357,7 +352,7 @@ mod tests {
         agc.set_gain(0.5).unwrap();
         agc.set_scale(1.5).unwrap();
         agc.squelch_enable();
-        agc.execute_block(&mut input, &mut output);
+        agc.execute_block(&input, &mut output);
         let solution = [
             Complex32::new(1.5, -0.0),
             Complex32::new(3.0, -1.05),
