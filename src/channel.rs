@@ -12,6 +12,8 @@ pub struct ChannelCccf {
 }
 
 impl ChannelCccf {
+
+    /// create structured channel object with default parameters
     pub fn create() -> Self {
         unsafe {
             Self{
@@ -108,4 +110,12 @@ impl ChannelCccf {
         }
     }
 
+}
+
+impl Drop for ChannelCccf {
+    fn drop(&mut self) {
+        unsafe {
+            raw::channel_cccf_destroy(self.inner);
+        }
+    }
 }
