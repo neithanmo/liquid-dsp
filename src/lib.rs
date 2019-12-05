@@ -11,7 +11,7 @@ mod cvsd;
 mod cbuffer;
 mod channel;
 mod tvmpch;
-mod fec;
+pub mod fec;
 
 mod enums;
 mod utils;
@@ -23,6 +23,6 @@ pub use cvsd::Cvsd;
 pub use cbuffer::{CbufferCf, CbufferRf};
 pub use channel::ChannelCccf;
 pub use tvmpch::TvmpchCccf;
-pub use fec::Fec;
+pub use fec::{Fec, Interleaver};
 
 pub use enums::{AgcSquelchMode, AmpModemType};
