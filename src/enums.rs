@@ -1,4 +1,5 @@
 use std::fmt;
+use std::mem::transmute;
 
 bitflags! {
 
@@ -40,6 +41,44 @@ impl fmt::Debug for AmpModemType {
             AmpModemType::LSB => "single side-band (lower)",
         };
         write!(f,"{}",type_)
+    }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub enum FecScheme {
+    UNKNOWN,
+    NONE,
+    REP3,
+    REP5,
+    HAMMING74,
+    HAMMING84,
+    HAMMING128,
+    GOLAY2412,
+    SECDED2216,
+    SECDED3932,
+    SECDED7264,
+    CONV_V27,
+    CONV_V29,
+    CONV_V39,
+    CONV_V615,
+    CONV_V27P23,
+    CONV_V27P34,
+    CONV_V27P45,
+    CONV_V27P56,
+    CONV_V27P67,
+    CONV_V27P78,
+    CONV_V29P23,
+    CONV_V29P34,
+    CONV_V29P45,
+    CONV_V29P56,
+    CONV_V29P67,
+    CONV_V29P78,
+    RS_M8,
+}
+
+impl From<FecScheme> for u32 {
+    fn from(value: FecScheme) -> u32 {
+        unsafe { transmute::<FecScheme, u8>(value) as u32 }
     }
 }
 
