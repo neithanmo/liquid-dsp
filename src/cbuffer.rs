@@ -20,10 +20,6 @@ pub struct CbufferCf {
     num_elements:u32,
 }
 
-pub struct CbuffIter<'a, T> {
-    buff: &'a [T],
-}
-
 macro_rules! cbuffer_xxx_impl {
     ($obj:ty, ($create:expr, $create_max:expr,
         $reset:expr, $size:expr,
@@ -170,27 +166,18 @@ impl CbufferCf {
         }   
     }
 
-    pub fn read(&self, num_requested: usize) -> &[Complex32] {
+    pub fn read(&self) -> &[Complex32] {
         let ptr = &mut Complex32::default().to_ptr_mut() as *mut _;
         let mut len = 0u32;
         unsafe {
             raw::cbuffercf_read(
                 self.inner,
-                num_requested as c_uint,
+                self.num_elements as c_uint,
                 ptr,
                 &mut len as *mut _
             );
             slice::from_raw_parts(*ptr as *const _, len as usize)
         } 
-    }
-
-    pub fn iter(&self) -> CbuffIter<Complex32> {
-        let len = self.max_read() as usize;
-        unsafe {
-            CbuffIter {
-                buff: self.read(len),
-            }
-        }    
     }
 }
 
@@ -233,27 +220,18 @@ impl CbufferRf {
         }   
     }
 
-    pub fn read(&self, num_requested: usize) -> &[f32] {
-        let mut ptr = 0f32;
-        let mut ptr = &mut ptr as *mut _;
+    pub fn read(&self) -> &[f32] {
+        let mut ptr = 0f32.to_ptr_mut();
         let mut len = 0u32;
         unsafe {
             raw::cbufferf_read(
                 self.inner,
-                num_requested as c_uint,
+                self.num_elements as c_uint,
                 &mut ptr as *mut _,
                 &mut len as *mut _
             );
             slice::from_raw_parts(ptr as *const _, len as usize)
         } 
-    }
-}
-
-impl<'a, T> Iterator for CbuffIter<'a, T> {
-    type Item = &'a T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.buff.iter().next()
     }
 }
 
@@ -291,6 +269,21 @@ cbuffer_xxx_impl!(
     )
 );
 
+impl AsRef<[f32]> for CbufferRf {
+    #[inline]
+    fn as_ref(&self) -> &[f32] {
+        self.read()
+    }
+}
+
+impl AsRef<[Complex32]> for CbufferCf {
+    #[inline]
+    fn as_ref(&self) -> &[Complex32] {
+        self.read()
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::{CbufferRf};
@@ -298,12 +291,11 @@ mod tests {
     #[test]
     fn test_cbufferf() {
         let mut v = [1.2, 2.5, 3.6, 4.4, 5.8, 6.9, 7.8, 8.98];
-        let num_requested = 3;
 
         let mut  cb = CbufferRf::create(10);
 
         cb.write(&mut v).unwrap();
-        assert_eq!(cb.read(num_requested), &v[..num_requested]);
+        assert_eq!(cb.read(), &v);
 
         // release 2 elements from the buffer
         cb.release(2).unwrap();
@@ -312,5 +304,9 @@ mod tests {
 
         cb.push(2.5).unwrap();
         cb.push(1.5).unwrap();
+        for x in cb.read() {
+            println!("{}", x);
+        }
+        cb.release(8);
     }
 }
