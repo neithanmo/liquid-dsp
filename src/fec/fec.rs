@@ -14,7 +14,7 @@ impl Fec {
         let ptr: *mut c_void = ptr::null_mut();
         unsafe {
             Self {
-                inner: raw::fec_create(u32::from(scheme) as c_uint, ptr),
+                inner: raw::fec_create(u8::from(scheme) as c_uint, ptr),
             }
         }
     }
@@ -25,7 +25,7 @@ impl Fec {
     ///  msg_len    :   raw uncoded message length
     pub fn get_enc_msg_length(scheme: FecScheme, msg_len: u32) -> u32 {
         unsafe {
-            raw::fec_get_enc_msg_length(u32::from(scheme) as c_uint, msg_len as c_uint) as u32
+            raw::fec_get_enc_msg_length(u8::from(scheme) as c_uint, msg_len as c_uint) as u32
         }
     }
 
@@ -33,7 +33,7 @@ impl Fec {
     /// correction scheme (object-independent method)
     pub fn get_rate(scheme: FecScheme) -> f32 {
         unsafe {
-            raw::fec_get_rate(u32::from(scheme)) 
+            raw::fec_get_rate(u8::from(scheme) as _) 
         }
     }
 
@@ -42,7 +42,7 @@ impl Fec {
     pub fn recreate(mut self, scheme: FecScheme) -> Self {
         let ptr: *mut c_void = ptr::null_mut();
         unsafe {
-            self.inner = raw::fec_recreate(self.inner, u32::from(scheme) as c_uint, ptr);
+            self.inner = raw::fec_recreate(self.inner, u8::from(scheme) as c_uint, ptr);
         }
         self
     }
