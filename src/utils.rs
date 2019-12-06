@@ -66,3 +66,30 @@ impl ToCValue for Complex32 {
     }
 }
 
+/*impl ToCValue for f32 {
+    type Output = Self;
+    fn to_c_value(self) -> Self::Output {
+        self
+    }
+} */
+
+impl ToCPointer for f32 {
+    type Output = *const f32;
+    fn to_ptr(&self) -> Self::Output {
+        self as *const _
+    }
+}
+
+impl ToCPointerMut for f32 {
+    type Output = *mut f32;
+    fn to_ptr_mut(&mut self) -> Self::Output {
+        self as _
+    }
+}
+
+impl ToCPointer for [f32] {
+    type Output = *const f32;
+    fn to_ptr(&self) -> Self::Output {
+        self.as_ptr()
+    }
+}

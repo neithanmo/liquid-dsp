@@ -23,6 +23,6 @@ pub use cvsd::Cvsd;
 pub use cbuffer::{CbufferCf, CbufferRf};
 pub use channel::ChannelCccf;
 pub use tvmpch::TvmpchCccf;
-pub use fec::{Fec, Interleaver};
+pub use fec::{Fec, Interleaver, Packetizer};
 
-pub use enums::{AgcSquelchMode, AmpModemType};
+pub use enums::{AgcSquelchMode, AmpModemType, FecScheme, CrcScheme};
