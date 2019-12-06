@@ -1,3 +1,4 @@
+#![allow(non_camel_case_types, non_snake_case)]
 use std::fmt;
 use std::mem::transmute;
 
@@ -76,9 +77,74 @@ pub enum FecScheme {
     RS_M8,
 }
 
-impl From<FecScheme> for u32 {
-    fn from(value: FecScheme) -> u32 {
-        unsafe { transmute::<FecScheme, u8>(value) as u32 }
+impl From<FecScheme> for u8 {
+    fn from(value: FecScheme) -> u8 {
+        unsafe { transmute::<FecScheme, u8>(value)}
     }
 }
 
+impl From<u8> for FecScheme {
+    fn from(value: u8) -> Self {
+        if value > 27 {
+            return FecScheme::UNKNOWN;
+        }
+        unsafe { transmute::<u8, FecScheme>(value) }
+    }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub enum CrcScheme {
+    CRC_UNKNOWN,
+    CRC_NONE,
+    CRC_CHECKSUM,
+    CRC_8,
+    CRC_16,
+    CRC_24,
+    CRC_32,
+}
+
+impl From<CrcScheme> for u8 {
+    fn from(value: CrcScheme) -> u8 {
+        unsafe { transmute::<CrcScheme, u8>(value)}
+    }
+}
+
+impl From<u8> for CrcScheme {
+    fn from(value: u8) -> Self {
+        if value > 6 {
+            return CrcScheme::CRC_UNKNOWN;
+        }
+        unsafe { transmute::<u8, CrcScheme>(value) }
+    }
+}
+
+pub enum FftType {
+    BACKWARD = -1,
+    UNKNOWN,
+    FORWARD,
+    REDFT00,
+    REDFT10,
+    REDFT01,
+    REDFT11,
+    RODFT00,
+    RODFT10,
+    RODFT01,
+    RODFT11,
+    MDCT,
+    IMDCT,
+}
+
+impl From<FftType> for i8 {
+    fn from(value: FftType) -> i8 {
+        unsafe { transmute::<FftType, i8>(value)}
+    }
+}
+
+impl From<i8> for FftType {
+    fn from(value: i8) -> Self {
+        if value > 6 {
+            return Self::UNKNOWN;
+        }
+        unsafe { transmute::<i8, Self>(value) }
+    }
+}
