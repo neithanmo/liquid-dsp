@@ -1,3 +1,4 @@
+// use std::marker::PhantomData;
 use libc::c_uint;
 use std::fmt;
 use std::slice;
@@ -17,6 +18,10 @@ pub struct CbufferRf {
 pub struct CbufferCf {
     inner: raw::cbuffercf,
     num_elements:u32,
+}
+
+pub struct CbuffIter<'a, T> {
+    buff: &'a [T],
 }
 
 macro_rules! cbuffer_xxx_impl {
@@ -178,6 +183,15 @@ impl CbufferCf {
             slice::from_raw_parts(*ptr as *const _, len as usize)
         } 
     }
+
+    pub fn iter(&self) -> CbuffIter<Complex32> {
+        let len = self.max_read() as usize;
+        unsafe {
+            CbuffIter {
+                buff: self.read(len),
+            }
+        }    
+    }
 }
 
 impl CbufferRf {
@@ -232,6 +246,14 @@ impl CbufferRf {
             );
             slice::from_raw_parts(ptr as *const _, len as usize)
         } 
+    }
+}
+
+impl<'a, T> Iterator for CbuffIter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.buff.iter().next()
     }
 }
 
