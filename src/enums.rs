@@ -1,3 +1,4 @@
+
 #![allow(non_camel_case_types, non_snake_case)]
 use std::fmt;
 use std::mem::transmute;
@@ -92,7 +93,7 @@ impl From<u8> for FecScheme {
     }
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum CrcScheme {
     CRC_UNKNOWN,
     CRC_NONE,
@@ -118,20 +119,21 @@ impl From<u8> for CrcScheme {
     }
 }
 
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum FftType {
     BACKWARD = -1,
-    UNKNOWN,
-    FORWARD,
-    REDFT00,
-    REDFT10,
-    REDFT01,
-    REDFT11,
-    RODFT00,
-    RODFT10,
-    RODFT01,
-    RODFT11,
-    MDCT,
-    IMDCT,
+    UNKNOWN = 0,
+    FORWARD = 1,
+    REDFT00 = 10,
+    REDFT10 = 11,
+    REDFT01 = 12,
+    REDFT11 = 13,
+    RODFT00 = 20,
+    RODFT10 = 21,
+    RODFT01 = 22,
+    RODFT11 = 23,
+    MDCT = 30,
+    IMDCT = 31,
 }
 
 impl From<FftType> for i8 {
@@ -142,8 +144,12 @@ impl From<FftType> for i8 {
 
 impl From<i8> for FftType {
     fn from(value: i8) -> Self {
-        if value > 6 {
-            return Self::UNKNOWN;
+        match value {
+           -1 | 0 | 1 => {},
+           10..=13 => {},
+           20..=23 => {},
+           30 | 31 => {},
+           - => return FftType::UNKNOWN, 
         }
         unsafe { transmute::<i8, Self>(value) }
     }
