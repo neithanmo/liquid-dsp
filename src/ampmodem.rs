@@ -3,11 +3,10 @@ use std::fmt;
 
 use num::complex::Complex32;
 
-use crate::enums::{AmpModemType};
+use crate::enums::AmpModemType;
 use crate::liquid_dsp_sys as raw;
 
-use crate::utils::{ToCValue, ToCPointer, ToCPointerMut};
-
+use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 
 pub struct AmpModem {
     inner: raw::ampmodem,
@@ -20,10 +19,14 @@ impl AmpModem {
     pub fn create(index: f32, modem_type: AmpModemType, suppressed_carrier: i32) -> Self {
         unsafe {
             Self {
-                inner: raw::ampmodem_create(index, u32::from(modem_type) as c_uint, suppressed_carrier as c_int),
+                inner: raw::ampmodem_create(
+                    index,
+                    u32::from(modem_type) as c_uint,
+                    suppressed_carrier as c_int,
+                ),
                 index,
                 suppressed_carrier: suppressed_carrier != 0,
-                modem_type, 
+                modem_type,
             }
         }
     }
@@ -35,15 +38,11 @@ impl AmpModem {
     }
 
     pub fn get_delay_mod(&self) -> u32 {
-        unsafe {
-            raw::ampmodem_get_delay_mod(self.inner) as u32
-        }
+        unsafe { raw::ampmodem_get_delay_mod(self.inner) as u32 }
     }
 
     pub fn get_delay_demod(&self) -> u32 {
-        unsafe {
-            raw::ampmodem_get_delay_demod(self.inner) as u32
-        }
+        unsafe { raw::ampmodem_get_delay_demod(self.inner) as u32 }
     }
 
     pub fn modulate(&self, sample: f32) -> Complex32 {
@@ -54,14 +53,18 @@ impl AmpModem {
         }
     }
 
-    pub fn modulate_block(&self, samples:&[f32], output: &mut[Complex32]) {
+    pub fn modulate_block(&self, samples: &[f32], output: &mut [Complex32]) {
         assert!(
             samples.len() == output.len(),
             "Input and output buffers with different length"
         );
         unsafe {
-            raw::ampmodem_modulate_block(self.inner, samples.as_ptr() as *mut f32, samples.len() as c_uint, 
-            output.to_ptr_mut());
+            raw::ampmodem_modulate_block(
+                self.inner,
+                samples.as_ptr() as *mut f32,
+                samples.len() as c_uint,
+                output.to_ptr_mut(),
+            );
         }
     }
 
@@ -72,18 +75,21 @@ impl AmpModem {
             *ptr
         }
     }
-    
+
     pub fn demodulate_block(&self, samples: &[Complex32], output: &mut [f32]) {
         assert!(
             samples.len() == output.len(),
             "Input and output buffers with different length"
         );
         unsafe {
-            raw::ampmodem_demodulate_block(self.inner, samples.to_ptr() as *mut _, 
-                samples.len() as c_uint, output.as_mut_ptr());
+            raw::ampmodem_demodulate_block(
+                self.inner,
+                samples.to_ptr() as *mut _,
+                samples.len() as c_uint,
+                output.as_mut_ptr(),
+            );
         }
     }
-
 }
 
 impl fmt::Debug for AmpModem {
@@ -91,7 +97,7 @@ impl fmt::Debug for AmpModem {
         write!(
             f,
             "ampmodem [index: {} , type: {:?} , suppressed_carrier: {}]:\n",
-             self.index, self.modem_type, self.suppressed_carrier
+            self.index, self.modem_type, self.suppressed_carrier
         )
     }
 }

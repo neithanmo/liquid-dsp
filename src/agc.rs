@@ -3,7 +3,7 @@ use std::fmt;
 
 use num::complex::Complex32;
 
-use crate::enums::{AgcSquelchMode};
+use crate::enums::AgcSquelchMode;
 use crate::liquid_dsp_sys as raw;
 
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
@@ -262,11 +262,7 @@ impl AgcCrcf {
             return Err("number of samples must be greater than zero");
         }
         unsafe {
-            raw::agc_crcf_init(
-                self.inner,
-                input.to_ptr() as *mut _,
-                input.len() as c_uint,
-            );
+            raw::agc_crcf_init(self.inner, input.to_ptr() as *mut _, input.len() as c_uint);
         }
         Ok(())
     }
@@ -274,11 +270,7 @@ impl AgcCrcf {
     pub fn execute(&self, input: Complex32) -> Complex32 {
         let mut out = Complex32::default();
         unsafe {
-            raw::agc_crcf_execute(
-                self.inner,
-                input.to_c_value(),
-                out.to_ptr_mut(),
-            );
+            raw::agc_crcf_execute(self.inner, input.to_c_value(), out.to_ptr_mut());
             out
         }
     }
@@ -336,7 +328,7 @@ impl AgcRrrf {
 
 #[cfg(test)]
 mod tests {
-    use super::{AgcCrcf};
+    use super::AgcCrcf;
     use num::complex::Complex32;
     use num::Zero;
 
@@ -367,6 +359,6 @@ mod tests {
         let agc = AgcCrcf::create();
         agc.execute(Complex32::new(5.9999495, -3.1499734));
         let rssi = agc.get_rssi();
-        assert_eq!(0.016113421, rssi);    
+        assert_eq!(0.016113421, rssi);
     }
 }

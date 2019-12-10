@@ -1,4 +1,3 @@
-
 #![allow(non_camel_case_types, non_snake_case)]
 use std::fmt;
 use std::mem::transmute;
@@ -42,7 +41,7 @@ impl fmt::Debug for AmpModemType {
             AmpModemType::USB => "single side-band (upper)",
             AmpModemType::LSB => "single side-band (lower)",
         };
-        write!(f,"{}",type_)
+        write!(f, "{}", type_)
     }
 }
 
@@ -80,7 +79,7 @@ pub enum FecScheme {
 
 impl From<FecScheme> for u8 {
     fn from(value: FecScheme) -> u8 {
-        unsafe { transmute::<FecScheme, u8>(value)}
+        unsafe { transmute::<FecScheme, u8>(value) }
     }
 }
 
@@ -106,7 +105,7 @@ pub enum CrcScheme {
 
 impl From<CrcScheme> for u8 {
     fn from(value: CrcScheme) -> u8 {
-        unsafe { transmute::<CrcScheme, u8>(value)}
+        unsafe { transmute::<CrcScheme, u8>(value) }
     }
 }
 
@@ -138,18 +137,18 @@ pub enum FftType {
 
 impl From<FftType> for i8 {
     fn from(value: FftType) -> i8 {
-        unsafe { transmute::<FftType, i8>(value)}
+        unsafe { transmute::<FftType, i8>(value) }
     }
 }
 
 impl From<i8> for FftType {
     fn from(value: i8) -> Self {
         match value {
-           -1 | 0 | 1 => {},
-           10..=13 => {},
-           20..=23 => {},
-           30 | 31 => {},
-           - => return FftType::UNKNOWN, 
+            -1 | 0 | 1 => {}
+            10..=13 => {}
+            20..=23 => {}
+            30 | 31 => {}
+            _ => return FftType::UNKNOWN,
         }
         unsafe { transmute::<i8, Self>(value) }
     }

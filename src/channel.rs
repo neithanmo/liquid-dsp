@@ -12,11 +12,10 @@ pub struct ChannelCccf {
 }
 
 impl ChannelCccf {
-
     /// create structured channel object with default parameters
     pub fn create() -> Self {
         unsafe {
-            Self{
+            Self {
                 inner: raw::channel_cccf_create(),
             }
         }
@@ -77,7 +76,7 @@ impl ChannelCccf {
     ///  fd         : Doppler frequency, _fd in (0,0.5)
     pub fn add_shadowing(&mut self, sigma: f32, fd: f32) {
         assert!(
-            sigma <= 0f32 ,
+            sigma <= 0f32,
             "standard deviation less than or equal to zero"
         );
 
@@ -91,7 +90,7 @@ impl ChannelCccf {
     }
 
     /// apply channel impairments on single input sample
-    pub fn execute(&self,sample: Complex32) -> Complex32 {
+    pub fn execute(&self, sample: Complex32) -> Complex32 {
         let mut out = Complex32::default();
         unsafe {
             raw::channel_cccf_execute(self.inner, sample.to_c_value(), out.to_ptr_mut());
@@ -101,15 +100,18 @@ impl ChannelCccf {
 
     pub fn execute_block(&self, input: &[Complex32], output: &mut [Complex32]) {
         assert!(
-            input.len() == output.len() ,
+            input.len() == output.len(),
             "buffers must have the same lenght"
         );
         unsafe {
-            raw::channel_cccf_execute_block(self.inner, input.to_ptr() as *mut _, 
-                input.len() as c_uint, output.to_ptr_mut());
+            raw::channel_cccf_execute_block(
+                self.inner,
+                input.to_ptr() as *mut _,
+                input.len() as c_uint,
+                output.to_ptr_mut(),
+            );
         }
     }
-
 }
 
 impl Drop for ChannelCccf {

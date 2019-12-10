@@ -3,7 +3,7 @@ use std::fmt;
 use crate::liquid_dsp_sys as raw;
 use num::complex::Complex32;
 
-use crate::utils::{ToCValue, ToCPointerMut};
+use crate::utils::{ToCPointerMut, ToCValue};
 
 pub struct AutoCorrRrrf {
     inner: raw::autocorr_rrrf,
@@ -72,7 +72,6 @@ autocorr_xxx_impl!(
 );
 
 impl AutoCorrCccf {
-   
     pub fn push(&self, sample: Complex32) {
         unsafe {
             raw::autocorr_cccf_push(self.inner, sample.to_c_value());
@@ -82,10 +81,7 @@ impl AutoCorrCccf {
     pub fn execute(&self) -> Complex32 {
         unsafe {
             let mut out = Complex32::default();
-            raw::autocorr_cccf_execute(
-                self.inner,
-                out.to_ptr_mut(),
-            );
+            raw::autocorr_cccf_execute(self.inner, out.to_ptr_mut());
             out
         }
     }
@@ -101,10 +97,7 @@ impl AutoCorrCccf {
             .for_each(|(isample, osample)| {
                 self.push(*isample);
                 unsafe {
-                    raw::autocorr_cccf_execute(
-                        self.inner,
-                        osample.to_ptr_mut()
-                    );
+                    raw::autocorr_cccf_execute(self.inner, osample.to_ptr_mut());
                 }
             });
     }
@@ -114,9 +107,7 @@ impl AutoCorrCccf {
     }
 }
 
-
 impl AutoCorrRrrf {
-    
     pub fn push(&self, sample: f32) {
         unsafe {
             raw::autocorr_rrrf_push(self.inner, sample);

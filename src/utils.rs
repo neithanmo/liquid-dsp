@@ -23,36 +23,28 @@ pub(crate) trait ToCValue {
 impl ToCPointer for Complex32 {
     type Output = *const LiquidFloatComplex;
     fn to_ptr(&self) -> Self::Output {
-        unsafe {
-            transmute::<*const Complex32, *const LiquidFloatComplex>(self as *const _)
-        }
+        unsafe { transmute::<*const Complex32, *const LiquidFloatComplex>(self as *const _) }
     }
 }
 
 impl ToCPointerMut for Complex32 {
     type Output = *mut LiquidFloatComplex;
     fn to_ptr_mut(&mut self) -> Self::Output {
-        unsafe {
-            transmute::<*mut Complex32, *mut LiquidFloatComplex>(self as *mut _)
-        }
+        unsafe { transmute::<*mut Complex32, *mut LiquidFloatComplex>(self as *mut _) }
     }
 }
 
 impl ToCPointer for [Complex32] {
     type Output = *const LiquidFloatComplex;
     fn to_ptr(&self) -> Self::Output {
-        unsafe {
-            transmute::<*const Complex32, *const LiquidFloatComplex>(self.as_ptr())
-        }
+        unsafe { transmute::<*const Complex32, *const LiquidFloatComplex>(self.as_ptr()) }
     }
 }
 
 impl ToCPointerMut for [Complex32] {
     type Output = *mut LiquidFloatComplex;
     fn to_ptr_mut(&mut self) -> Self::Output {
-        unsafe {
-            transmute::<*mut Complex32, *mut LiquidFloatComplex>(self.as_mut_ptr())
-        }
+        unsafe { transmute::<*mut Complex32, *mut LiquidFloatComplex>(self.as_mut_ptr()) }
     }
 }
 
@@ -93,3 +85,5 @@ impl ToCPointer for [f32] {
         self.as_ptr()
     }
 }
+
+// pub(crate) str_to_c<'a>()

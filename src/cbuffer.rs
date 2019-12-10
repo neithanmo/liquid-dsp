@@ -3,25 +3,25 @@ use libc::c_uint;
 use std::fmt;
 use std::slice;
 
-use num::complex::Complex32;
-
+use crate::errors::{ErrorKind, LiquidError};
 use crate::liquid_dsp_sys as raw;
+use num::complex::Complex32;
 
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 
-
 pub struct CbufferRf {
     inner: raw::cbufferf,
-    num_elements:u32,
+    num_elements: u32,
 }
 
 pub struct CbufferCf {
     inner: raw::cbuffercf,
-    num_elements:u32,
+    num_elements: u32,
 }
 
 macro_rules! cbuffer_xxx_impl {
-    ($obj:ty, ($create:expr, $create_max:expr,
+    ($obj:ty, (
+        $create:expr, $create_max:expr,
         $reset:expr, $size:expr,
         $max_size:expr,$max_read:expr,
         $space_available:expr,$is_full:expr,
@@ -37,10 +37,10 @@ macro_rules! cbuffer_xxx_impl {
             }
 
             /// create circular buffer object of a particular size
-            /// 
+            ///
             /// and specify the maximum number of elements that can be read
             /// at any given time.
-            pub fn create_max(max_size: u32, max_read: u32,) -> Self {
+            pub fn create_max(max_size: u32, max_read: u32) -> Self {
                 Self {
                     inner: unsafe { $create_max(max_size as _, max_read as _) },
                     num_elements: 0,
@@ -55,38 +55,28 @@ macro_rules! cbuffer_xxx_impl {
 
             ///  returns the number of elements currently in the buffer
             pub fn size(&self) -> u32 {
-                unsafe {
-                    $size(self.inner) as u32
-                }
+                unsafe { $size(self.inner) as u32 }
             }
 
-            /// returns the maximum number of elements the buffer can hold 
+            /// returns the maximum number of elements the buffer can hold
             pub fn max_size(&self) -> u32 {
-                unsafe {
-                    $max_size(self.inner) as u32
-                }
+                unsafe { $max_size(self.inner) as u32 }
             }
 
             /// Returns the maximum number of elements that can be read from
             /// the buffer at any given time.
             pub fn max_read(&self) -> u32 {
-                unsafe {
-                    $max_read(self.inner) as u32
-                }
+                unsafe { $max_read(self.inner) as u32 }
             }
 
             /// return number of elements available for writing
             pub fn space_available(&self) -> u32 {
-                unsafe {
-                    $space_available(self.inner) as u32
-                }
+                unsafe { $space_available(self.inner) as u32 }
             }
 
             // TODO check it
             pub fn is_full(&self) -> bool {
-                unsafe {
-                    $is_full(self.inner) == 1
-                }
+                unsafe { $is_full(self.inner) == 1 }
             }
 
             /// print cbuffer object properties and internal state
@@ -96,9 +86,9 @@ macro_rules! cbuffer_xxx_impl {
                 }
             }
 
-            pub fn release(&mut self, n: usize) -> Result<(), &'static str> {
+            pub fn release(&mut self, n: usize) -> Result<(), LiquidError> {
                 if n > self.num_elements as usize {
-                    return Err("cannot release more elements in buffer than exist")
+                    return Err(LiquidError::from(ErrorKind::EmptyBuffer));
                 }
                 unsafe {
                     $release(self.inner, n as c_uint);
@@ -112,7 +102,10 @@ macro_rules! cbuffer_xxx_impl {
                 write!(
                     f,
                     "cbuffer: {} [max size: {}, max read: {}, elements: {}]:\n",
-                    stringify!($obj), self.max_size(), self.max_read(), self.num_elements
+                    stringify!($obj),
+                    self.max_size(),
+                    self.max_read(),
+                    self.num_elements
                 )
             }
         }
@@ -143,27 +136,30 @@ impl CbufferCf {
     // write samples from the buffer
     pub fn write(&mut self, buffer: &[Complex32]) -> Result<(), &'static str> {
         if buffer.len() > self.space_available() as usize {
-            return Err("cannot write more elements than are available")
+            return Err("cannot write more elements than are available");
         }
         unsafe {
-            raw::cbuffercf_write(self.inner, buffer.to_ptr() as *mut _, buffer.len() as c_uint);
+            raw::cbuffercf_write(
+                self.inner,
+                buffer.to_ptr() as *mut _,
+                buffer.len() as c_uint,
+            );
             self.num_elements += buffer.len() as u32;
             Ok(())
         }
-        
     }
 
     /// remove and return a single element from the buffer
     pub fn pop(&mut self) -> Option<Complex32> {
         if self.num_elements == 0u32 {
-            return None
+            return None;
         }
         unsafe {
             let mut out = Complex32::default();
             raw::cbuffercf_pop(self.inner, out.to_ptr_mut());
             self.num_elements -= 1;
             Some(out)
-        }   
+        }
     }
 
     pub fn read(&self) -> &[Complex32] {
@@ -174,10 +170,10 @@ impl CbufferCf {
                 self.inner,
                 self.num_elements as c_uint,
                 ptr,
-                &mut len as *mut _
+                &mut len as *mut _,
             );
             slice::from_raw_parts(*ptr as *const _, len as usize)
-        } 
+        }
     }
 }
 
@@ -197,27 +193,26 @@ impl CbufferRf {
     // write samples from the buffer
     pub fn write(&mut self, buffer: &mut [f32]) -> Result<(), &'static str> {
         if buffer.len() > self.space_available() as usize {
-            return Err("cannot write more elements than are available")
+            return Err("cannot write more elements than are available");
         }
         unsafe {
             raw::cbufferf_write(self.inner, buffer.as_mut_ptr(), buffer.len() as c_uint);
             self.num_elements += buffer.len() as u32;
             Ok(())
         }
-        
     }
 
     /// remove and return a single element from the buffer
     pub fn pop(&mut self) -> Option<f32> {
         if self.num_elements == 0u32 {
-            return None
+            return None;
         }
         unsafe {
             let mut out = 0f32;
             raw::cbufferf_pop(self.inner, &mut out as *mut _);
             self.num_elements -= 1;
             Some(out)
-        }   
+        }
     }
 
     pub fn read(&self) -> &[f32] {
@@ -228,10 +223,10 @@ impl CbufferRf {
                 self.inner,
                 self.num_elements as c_uint,
                 &mut ptr as *mut _,
-                &mut len as *mut _
+                &mut len as *mut _,
             );
             slice::from_raw_parts(ptr as *const _, len as usize)
-        } 
+        }
     }
 }
 
@@ -283,16 +278,15 @@ impl AsRef<[Complex32]> for CbufferCf {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use super::{CbufferRf};
+    use super::CbufferRf;
 
     #[test]
     fn test_cbufferf() {
         let mut v = [1.2, 2.5, 3.6, 4.4, 5.8, 6.9, 7.8, 8.98];
 
-        let mut  cb = CbufferRf::create(10);
+        let mut cb = CbufferRf::create(10);
 
         cb.write(&mut v).unwrap();
         assert_eq!(cb.read(), &v);
