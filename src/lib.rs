@@ -13,11 +13,12 @@ mod cvsd;
 mod fec;
 mod fft;
 mod tvmpch;
+mod filter;
 
 mod enums;
 mod utils;
-
 mod errors;
+mod callbacks;
 
 pub use agc::AgcCrcf;
 pub use ampmodem::AmpModem;
@@ -28,7 +29,8 @@ pub use cvsd::Cvsd;
 pub use fec::{Fec, Interleaver, Packetizer};
 pub use fft::{AsgramCf, AsgramRf, Fft, FftPlan};
 pub use tvmpch::TvmpchCccf;
+pub use filter::{Firdespm};
 
-pub use enums::{AgcSquelchMode, AmpModemType, CrcScheme, FecScheme, FftType};
+pub use enums::{AgcSquelchMode, AmpModemType, CrcScheme, FecScheme, FftType, FirdespmBtype, FirdespmWtype};
 
 pub use errors::LiquidError;
