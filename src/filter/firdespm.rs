@@ -1,24 +1,23 @@
-use libc::{c_uint, c_int, c_void};
+use libc::{c_int, c_uint, c_void};
 use std::marker::PhantomData;
 use std::mem::transmute;
 
 use crate::liquid_dsp_sys as raw;
 
-use crate::utils::catch;
 use crate::callbacks::Callbacks;
-use crate::enums::{FirdespmWtype, FirdespmBtype};
-use crate::errors::{LiquidError, ErrorKind};
+use crate::enums::{FirdespmBtype, FirdespmWtype};
+use crate::errors::{ErrorKind, LiquidError};
+use crate::utils::catch;
 
 pub extern "C" fn firdespm_callback_f<'a>(
     frecuency: f64,
     userdata: *mut c_void,
     desired: *mut f64,
-    weight: *mut f64
+    weight: *mut f64,
 ) -> c_int {
     catch(|| unsafe {
-        if let Some(fun) = (*(userdata as *mut Callbacks)).firdespm_callback.as_mut()
-        {
-            return fun(frecuency, &mut (*desired), &mut(*weight)) as c_int
+        if let Some(fun) = (*(userdata as *mut Callbacks)).firdespm_callback.as_mut() {
+            return fun(frecuency, &mut (*desired), &mut (*weight)) as c_int;
         }
         0
     })
@@ -54,8 +53,8 @@ pub extern "C" fn firdespm_callback_f<'a>(
 pub struct Firdespm<'a> {
     inner: raw::firdespm,
     h_len: usize,
-    callback: *mut Callbacks<'a>, 
-    phantom: PhantomData<&'a()>,
+    callback: *mut Callbacks<'a>,
+    phantom: PhantomData<&'a ()>,
 }
 
 impl<'a> Firdespm<'a> {
@@ -75,52 +74,71 @@ impl<'a> Firdespm<'a> {
         wtype: &[FirdespmWtype],
         btype: FirdespmBtype,
     ) -> Result<Self, LiquidError> {
-        let bands_len = bands.len()/2;
-        if bands_len == 0 && bands_len != num_bands{
-            return Err(LiquidError::from(ErrorKind::InvalidValue(format!("number of bands must be > 0 and bands.len() = 2 * num_bands"))))
+        let bands_len = bands.len() / 2;
+        if bands_len == 0 && bands_len != num_bands {
+            return Err(LiquidError::from(ErrorKind::InvalidValue(format!(
+                "number of bands must be > 0 and bands.len() = 2 * num_bands"
+            ))));
         }
         if num_bands != des.len() && num_bands != weights.len() && num_bands != wtype.len() {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(format!("des: {}, weights: {}, wtype: {} == {}", des.len(),
-            weights.len(), wtype.len(), num_bands))));
+            return Err(LiquidError::from(ErrorKind::InvalidValue(format!(
+                "des: {}, weights: {}, wtype: {} == {}",
+                des.len(),
+                weights.len(),
+                wtype.len(),
+                num_bands
+            ))));
         }
         unsafe {
-            Ok(
-                Self {
-                    inner: raw::firdespm_create(h_len as _, num_bands as _, bands.as_ptr() as _, des.as_ptr() as _
-                        , weights.as_ptr() as _, transmute::<*mut FirdespmWtype, *mut u32>(wtype.as_ptr() as _), u8::from(btype) as _),
-                    h_len,
-                    callback: std::ptr::null_mut() as _,
-                    phantom: PhantomData,
-                }
-            )
+            Ok(Self {
+                inner: raw::firdespm_create(
+                    h_len as _,
+                    num_bands as _,
+                    bands.as_ptr() as _,
+                    des.as_ptr() as _,
+                    weights.as_ptr() as _,
+                    transmute::<*mut FirdespmWtype, *mut u32>(wtype.as_ptr() as _),
+                    u8::from(btype) as _,
+                ),
+                h_len,
+                callback: std::ptr::null_mut() as _,
+                phantom: PhantomData,
+            })
         }
     }
-    
+
     pub fn create_callback<F>(
         h_len: usize,
         num_bands: usize,
         bands: &[f32],
         btype: FirdespmBtype,
         callback: F,
-    ) -> Result<Self, LiquidError> 
-        where F: FnMut(f64, &mut f64, &mut f64) -> i8 + 'a
+    ) -> Result<Self, LiquidError>
+    where
+        F: FnMut(f64, &mut f64, &mut f64) -> i8 + 'a,
     {
-        if num_bands == 0 && num_bands == bands.len() / 2{
-            return Err(LiquidError::from(ErrorKind::InvalidValue(format!("number of bands must be > 0 and bands.len() = 2 * num_bands"))))
+        if num_bands == 0 && num_bands == bands.len() / 2 {
+            return Err(LiquidError::from(ErrorKind::InvalidValue(format!(
+                "number of bands must be > 0 and bands.len() = 2 * num_bands"
+            ))));
         }
         let mut userdata = Callbacks::default();
         userdata.firdespm_callback = Some(Box::new(callback));
         let userdata = Box::into_raw(Box::new(userdata));
         unsafe {
-            Ok(
-                Self {
-                    inner: raw::firdespm_create_callback(h_len as _, num_bands as _, bands.as_ptr() as _, u8::from(btype) as _, 
-                        Some(firdespm_callback_f), userdata as _),
-                    h_len,
-                    callback: userdata,
-                    phantom: PhantomData,
-                }
-            )
+            Ok(Self {
+                inner: raw::firdespm_create_callback(
+                    h_len as _,
+                    num_bands as _,
+                    bands.as_ptr() as _,
+                    u8::from(btype) as _,
+                    Some(firdespm_callback_f),
+                    userdata as _,
+                ),
+                h_len,
+                callback: userdata,
+                phantom: PhantomData,
+            })
         }
     }
 
@@ -130,12 +148,12 @@ impl<'a> Firdespm<'a> {
         }
     }
 
-    pub fn execute(&self, h: &mut[f32]) {
+    pub fn execute(&self, h: &mut [f32]) {
         assert!(h.len() == self.h_len, "output == h_len");
         unsafe {
             raw::firdespm_execute(self.inner, h.as_mut_ptr());
         }
-    } 
+    }
 }
 
 impl<'a> Drop for Firdespm<'a> {

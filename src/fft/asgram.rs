@@ -1,11 +1,11 @@
-use std::str;
 use std::ffi::{CString, NulError};
+use std::str;
 
 use num::complex::Complex32;
 
+use crate::errors::{ErrorKind, LiquidError};
 use crate::liquid_dsp_sys as raw;
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
-use crate::errors::{LiquidError, ErrorKind};
 
 pub struct AsgramCf {
     inner: raw::asgramcf,
@@ -26,7 +26,10 @@ macro_rules! asgram_xxx_impl {
         impl $obj {
             pub fn create(nfft: u32) -> Result<Self, LiquidError> {
                 if nfft < 2 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(format!("nfft size must be at least {}", 2))))
+                    return Err(LiquidError::from(ErrorKind::InvalidValue(format!(
+                        "nfft size must be at least {}",
+                        2
+                    ))));
                 }
                 Ok(Self {
                     inner: unsafe { $create(nfft as _) },
@@ -48,11 +51,10 @@ macro_rules! asgram_xxx_impl {
             }
 
             pub fn set_display(&mut self, ascii: &str) -> Result<(), NulError> {
-                CString::new(ascii)
-                    .and_then(|c| unsafe {
-                        $setdisplay(self.inner, c.as_ptr() as *const _);
-                        Ok(())
-                    })
+                CString::new(ascii).and_then(|c| unsafe {
+                    $setdisplay(self.inner, c.as_ptr() as *const _);
+                    Ok(())
+                })
             }
 
             /// print asgram object properties and internal state

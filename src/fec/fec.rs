@@ -2,14 +2,13 @@ use libc::{c_uint, c_void};
 use std::ptr;
 
 use crate::enums::FecScheme;
+use crate::errors::{ErrorKind, LiquidError};
 use crate::liquid_dsp_sys as raw;
-use crate::errors::{LiquidError, ErrorKind};
 pub struct Fec {
     inner: raw::fec,
 }
 
 impl Fec {
-
     /// create a fec object of a particular scheme
     ///  scheme     :   error-correction scheme( FecScheme)
     pub fn create(scheme: FecScheme) -> Result<Self, LiquidError> {
@@ -18,9 +17,9 @@ impl Fec {
             if scheme != FecScheme::UNKNOWN {
                 return Ok(Self {
                     inner: raw::fec_create(u8::from(scheme) as c_uint, ptr),
-                })
+                });
             }
-            
+
             Err(LiquidError::from(ErrorKind::InvalidFecScheme))
         }
     }

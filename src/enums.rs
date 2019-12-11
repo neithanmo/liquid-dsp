@@ -178,8 +178,8 @@ impl From<u8> for FirdespmBtype {
 
 pub enum FirdespmWtype {
     FLATWEIGHT,
-    EXPWEIGHT, 
-    LINWEIGHT, 
+    EXPWEIGHT,
+    LINWEIGHT,
 }
 
 impl From<FirdespmWtype> for u8 {

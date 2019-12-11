@@ -12,13 +12,13 @@ mod channel;
 mod cvsd;
 mod fec;
 mod fft;
-mod tvmpch;
 mod filter;
+mod tvmpch;
 
-mod enums;
-mod utils;
-mod errors;
 mod callbacks;
+mod enums;
+mod errors;
+mod utils;
 
 pub use agc::AgcCrcf;
 pub use ampmodem::AmpModem;
@@ -28,9 +28,11 @@ pub use channel::ChannelCccf;
 pub use cvsd::Cvsd;
 pub use fec::{Fec, Interleaver, Packetizer};
 pub use fft::{AsgramCf, AsgramRf, Fft, FftPlan};
+pub use filter::Firdespm;
 pub use tvmpch::TvmpchCccf;
-pub use filter::{Firdespm};
 
-pub use enums::{AgcSquelchMode, AmpModemType, CrcScheme, FecScheme, FftType, FirdespmBtype, FirdespmWtype};
+pub use enums::{
+    AgcSquelchMode, AmpModemType, CrcScheme, FecScheme, FftType, FirdespmBtype, FirdespmWtype,
+};
 
 pub use errors::LiquidError;

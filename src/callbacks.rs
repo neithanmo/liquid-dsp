@@ -1,4 +1,3 @@
-
 #[doc(hidden)]
 #[derive(Default)]
 pub(crate) struct Callbacks<'a> {

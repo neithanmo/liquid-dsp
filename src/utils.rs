@@ -87,8 +87,6 @@ impl ToCPointer for [f32] {
     }
 }
 
-
-
 pub(crate) fn catch<T, F: FnOnce() -> T>(f: F) -> Option<T> {
     match panic::catch_unwind(AssertUnwindSafe(f)) {
         Ok(ret) => Some(ret),
