@@ -3,18 +3,25 @@ use std::ptr;
 
 use crate::enums::FecScheme;
 use crate::liquid_dsp_sys as raw;
-
+use crate::errors::{LiquidError, ErrorKind};
 pub struct Fec {
     inner: raw::fec,
 }
 
 impl Fec {
-    pub fn create(scheme: FecScheme) -> Self {
+
+    /// create a fec object of a particular scheme
+    ///  scheme     :   error-correction scheme( FecScheme)
+    pub fn create(scheme: FecScheme) -> Result<Self, LiquidError> {
         let ptr: *mut c_void = ptr::null_mut();
         unsafe {
-            Self {
-                inner: raw::fec_create(u8::from(scheme) as c_uint, ptr),
+            if scheme != FecScheme::UNKNOWN {
+                return Ok(Self {
+                    inner: raw::fec_create(u8::from(scheme) as c_uint, ptr),
+                })
             }
+            
+            Err(LiquidError::from(ErrorKind::InvalidFecScheme))
         }
     }
 
@@ -112,7 +119,7 @@ mod tests {
         let enc_len = Fec::get_enc_msg_length(FecScheme::HAMMING74, 4);
 
         let mut encoded_data = vec![0u8; enc_len as usize];
-        let fec = Fec::create(FecScheme::HAMMING74);
+        let fec = Fec::create(FecScheme::HAMMING74).unwrap();
 
         fec.encode(&raw, &mut encoded_data);
 

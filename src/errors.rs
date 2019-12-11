@@ -12,6 +12,7 @@ pub enum ErrorKind {
     NonPositiveValue, // case when a value is negative */
     EmptyBuffer,
     InvalidCrcScheme,
+    InvalidFecScheme,
     InvalidValue(String), // when a value does not fullfill certain restrictions
     Unknown,
 }
@@ -19,6 +20,7 @@ pub enum ErrorKind {
 impl ErrorKind {
     pub(crate) fn as_str(&self) -> &str {
         match self {
+            Self::InvalidFecScheme => "cannot validate with FecScheme of type UNKNOWN",
             Self::EmptyBuffer => "Buffer is already empty",
             Self::InvalidCrcScheme => "cannot validate with CRC type UNKNOWN",
             Self::InvalidValue(ref detail) => detail,
