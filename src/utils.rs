@@ -1,5 +1,6 @@
 use num::complex::Complex32;
 use std::mem::transmute;
+use std::panic::{self, AssertUnwindSafe};
 
 use crate::liquid_dsp_sys as raw;
 
@@ -86,4 +87,13 @@ impl ToCPointer for [f32] {
     }
 }
 
-// pub(crate) str_to_c<'a>()
+
+
+pub(crate) fn catch<T, F: FnOnce() -> T>(f: F) -> Option<T> {
+    match panic::catch_unwind(AssertUnwindSafe(f)) {
+        Ok(ret) => Some(ret),
+        Err(_) => {
+            std::process::exit(-1);
+        }
+    }
+}
