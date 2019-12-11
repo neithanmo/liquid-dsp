@@ -58,6 +58,7 @@ pub enum FecScheme {
     SECDED2216,
     SECDED3932,
     SECDED7264,
+    // conditional scheme to libfec, so, it must be insideof a #[feature:]
     CONV_V27,
     CONV_V29,
     CONV_V39,
@@ -151,5 +152,47 @@ impl From<i8> for FftType {
             _ => return FftType::UNKNOWN,
         }
         unsafe { transmute::<i8, Self>(value) }
+    }
+}
+
+pub enum FirdespmBtype {
+    BANDPASS,
+    DIFFERENTIATOR,
+    HILBERT,
+}
+
+impl From<FirdespmBtype> for u8 {
+    fn from(value: FirdespmBtype) -> u8 {
+        unsafe { transmute::<FirdespmBtype, u8>(value) }
+    }
+}
+
+impl From<u8> for FirdespmBtype {
+    fn from(value: u8) -> Self {
+        if value > 3 {
+            unimplemented!();
+        }
+        unsafe { transmute::<u8, FirdespmBtype>(value) }
+    }
+}
+
+pub enum FirdespmWtype {
+    FLATWEIGHT,
+    EXPWEIGHT, 
+    LINWEIGHT, 
+}
+
+impl From<FirdespmWtype> for u8 {
+    fn from(value: FirdespmWtype) -> u8 {
+        unsafe { transmute::<FirdespmWtype, u8>(value) }
+    }
+}
+
+impl From<u8> for FirdespmWtype {
+    fn from(value: u8) -> Self {
+        if value > 3 {
+            unimplemented!();
+        }
+        unsafe { transmute::<u8, FirdespmWtype>(value) }
     }
 }
