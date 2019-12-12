@@ -28,11 +28,12 @@ pub use channel::ChannelCccf;
 pub use cvsd::Cvsd;
 pub use fec::{Fec, Interleaver, Packetizer};
 pub use fft::{AsgramCf, AsgramRf, Fft, FftPlan};
-pub use filter::Firdespm;
+pub use filter::{Firdespm, FiRDes, FiR};
 pub use tvmpch::TvmpchCccf;
 
 pub use enums::{
     AgcSquelchMode, AmpModemType, CrcScheme, FecScheme, FftType, FirdespmBtype, FirdespmWtype,
+    FirFilterType,
 };
 
 pub use errors::LiquidError;

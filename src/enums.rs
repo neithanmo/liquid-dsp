@@ -155,6 +155,7 @@ impl From<i8> for FftType {
     }
 }
 
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum FirdespmBtype {
     BANDPASS,
     DIFFERENTIATOR,
@@ -176,6 +177,7 @@ impl From<u8> for FirdespmBtype {
     }
 }
 
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum FirdespmWtype {
     FLATWEIGHT,
     EXPWEIGHT,
@@ -194,5 +196,40 @@ impl From<u8> for FirdespmWtype {
             unimplemented!();
         }
         unsafe { transmute::<u8, FirdespmWtype>(value) }
+    }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+pub enum FirFilterType {
+    UNKNOWN, 
+    KAISER,
+    PM,
+    RCOS,
+    FEXP,
+    FSECH,
+    FARCSECH,
+    ARKAISER,
+    RKAISER,
+    RRC,
+    hM3,
+    GMSKTX,
+    GMSKRX,
+    RFEXP,
+    RFSECH,
+    RFARCSECH15,
+}
+
+impl From<FirFilterType> for u8 {
+    fn from(value: FirFilterType) -> u8 {
+        unsafe { transmute::<FirFilterType, u8>(value) }
+    }
+}
+
+impl From<u8> for FirFilterType {
+    fn from(value: u8) -> Self {
+        if value > 15 {
+            return Self::UNKNOWN
+        }
+        unsafe { transmute::<u8, FirFilterType>(value) }
     }
 }
