@@ -58,6 +58,30 @@ pub struct Firdespm<'a> {
 }
 
 impl<'a> Firdespm<'a> {
+
+    fn validate_inputs_length(
+        num_bands: usize,
+        bands: &[f32],
+        des: &[f32],
+        weights: &[f32],
+        wtype: &[FirdespmWtype] -> Result<(), LiquidError> {
+            let bands_len = bands.len() / 2;
+            if bands_len == 0 || bands_len != num_bands {
+                return Err(LiquidError::from(ErrorKind::InvalidLength{description: format!(
+                    "bands length: {} valid length: {}", bands.len(), num_bands * 2
+                )}));
+            }
+            if num_bands != des.len() || num_bands != weights.len() || num_bands != wtype.len() {
+                return Err(LiquidError::from(ErrorKind::InvalidLength(format!(
+                    "des: {}, weights: {}, wtype: {} == {}",
+                    des.len(),
+                    weights.len(),
+                    wtype.len(),
+                    num_bands
+                ))));
+            }
+            Ok(())
+        }
     /// create firdespm object
     ///  _h_len      :   length of filter (number of taps)
     ///  _bands      :   band edges, f in [0,0.5], [size: _num_bands x 2]
@@ -74,21 +98,7 @@ impl<'a> Firdespm<'a> {
         wtype: &[FirdespmWtype],
         btype: FirdespmBtype,
     ) -> Result<Self, LiquidError> {
-        let bands_len = bands.len() / 2;
-        if bands_len == 0 && bands_len != num_bands {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(format!(
-                "number of bands must be > 0 and bands.len() = 2 * num_bands"
-            ))));
-        }
-        if num_bands != des.len() && num_bands != weights.len() && num_bands != wtype.len() {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(format!(
-                "des: {}, weights: {}, wtype: {} == {}",
-                des.len(),
-                weights.len(),
-                wtype.len(),
-                num_bands
-            ))));
-        }
+        Self::validate_inputs_length(num_bands, bands, des, weights, wtype)?;
         unsafe {
             Ok(Self {
                 inner: raw::firdespm_create(
@@ -97,8 +107,8 @@ impl<'a> Firdespm<'a> {
                     bands.as_ptr() as _,
                     des.as_ptr() as _,
                     weights.as_ptr() as _,
-                    transmute::<*mut FirdespmWtype, *mut u32>(wtype.as_ptr() as _),
-                    u8::from(btype) as _,
+                    wtype: transmute::<*mut FirdespmWtype, *mut u32>(wtype.as_ptr() as _),
+                    btype: u8::from(btype) as _,
                 ),
                 h_len,
                 callback: std::ptr::null_mut() as _,
@@ -117,10 +127,10 @@ impl<'a> Firdespm<'a> {
     where
         F: FnMut(f64, &mut f64, &mut f64) -> i8 + 'a,
     {
-        if num_bands == 0 && num_bands == bands.len() / 2 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(format!(
-                "number of bands must be > 0 and bands.len() = 2 * num_bands"
-            ))));
+        if num_bands == 0 || num_bands != bands.len() / 2 {
+            return Err(LiquidError::from(ErrorKind::InvalidLength{description:format!(
+                "bands length: {} valid length: {}", bands.len(), num_bands * 2
+            )}));
         }
         let mut userdata = Callbacks::default();
         userdata.firdespm_callback = Some(Box::new(callback));
@@ -154,6 +164,63 @@ impl<'a> Firdespm<'a> {
             raw::firdespm_execute(self.inner, h.as_mut_ptr());
         }
     }
+
+    /// run filter design (full life cycle of object)
+    ///  h_len      :   length of filter (number of taps)
+    ///  num_bands  :   number of frequency bands
+    ///  bands      :   band edges, f in [0,0.5], [size: _num_bands x 2]
+    ///  des        :   desired response [size: _num_bands x 1]
+    ///  weights    :   response weighting [size: _num_bands x 1]
+    ///  wtype      :   weight types (e.g. LIQUID_FIRDESPM_FLATWEIGHT) [size: _num_bands x 1]
+    ///  btype      :   band type (e.g. LIQUID_FIRDESPM_BANDPASS)
+    ///  output      :   output coefficients array [size: _h_len x 1]
+    pub fn run(
+        h_len: usize,
+        num_bands: usize,
+        bands: &[f32],
+        des: &[f32],
+        weights: &[f32],
+        wtype: &[FirdespmWtype],
+        btype: FirdespmBtype,
+        output: &mut[f32]
+    ) -> Result<(), LiquidError> 
+    {
+        assert!(h.len() == self.h_len, "output == h_len");
+        Self::validate_inputs_length(num_bands, bands, des, weights, wtype)?;
+        unsafe {
+            raw::firdespm_run(
+                    h_len as _,
+                    num_bands as _,
+                    bands.as_ptr() as _,
+                    des.as_ptr() as _,
+                    weights.as_ptr() as _,
+                    wtype: transmute::<*mut FirdespmWtype, *mut u32>(wtype.as_ptr() as _),
+                    btype: u8::from(btype) as _,
+                    output.as_mut_ptr()
+            );
+        }
+    }
+
+    pub fn lowpass(
+        fc: f32,
+        As: f32,
+        mu: f32,
+        output: &mut[f32]
+    ) -> Result<(), LiquidError> 
+    {
+        assert!(output.len() > 0, "filter length must be greater than zero");
+        if mu < -0.5 || mu > 0.5 {
+            return Err(LiquidError::from(ErrorKind::
+                InvalidValue("mu out of range [-0.5,0.5]")));
+        } else if fc <0f32 || fc > 0.5 {
+           return Err(LiquidError::from(ErrorKind::
+                InvalidValue("cutoff frequency out of range (0, 0.5)"))); 
+        }
+        unsafe {
+            raw::firdespm_lowpass(output.len() as _, fc, As, mu, output.as_mut_ptr());
+        }
+        Ok(())
+    } 
 }
 
 impl<'a> Drop for Firdespm<'a> {
