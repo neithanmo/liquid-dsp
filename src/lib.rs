@@ -37,3 +37,6 @@ pub use enums::{
 };
 
 pub use errors::LiquidError;
+
+
+pub type LiquidResult<T> = Result<T, LiquidError>;
