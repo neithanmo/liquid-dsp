@@ -1,6 +1,5 @@
 use libc::c_uint;
 use std::fmt;
-
 use num::complex::Complex32;
 
 use crate::enums::AgcSquelchMode;
@@ -59,9 +58,9 @@ macro_rules! agc_xxx_impl {
                 }
             }
 
-            pub fn set_bandwidth(&mut self, b: f32) -> Result<(), &'static str> {
+            pub fn set_bandwidth(&mut self, b: f32) -> LiquidResult<()> {
                 if b < 0f32 {
-                    return Err("bandwith must be positive");
+                    return Err(LiquidError::from(ErrorKind::INVALID_VALUE("b must be greater than zero".to_owned())))
                 }
                 unsafe {
                     $setband(self.inner, b);
@@ -77,9 +76,9 @@ macro_rules! agc_xxx_impl {
                 unsafe { $getsignal(self.inner) }
             }
 
-            pub fn set_signal_level(&mut self, level: f32) -> Result<(), &'static str> {
+            pub fn set_signal_level(&mut self, level: f32) -> LiquidResult<()> {
                 if level <= 0f32 {
-                    return Err("level must be greater than zero");
+                    return Err(LiquidError::from(ErrorKind::INVALID_VALUE("level must be greater than zero".to_owned())))
                 }
                 unsafe {
                     $setsignal(self.inner, level);
@@ -100,9 +99,9 @@ macro_rules! agc_xxx_impl {
                 unsafe { $getgain(self.inner) }
             }
 
-            pub fn set_gain(&mut self, gain: f32) -> Result<(), &'static str> {
+            pub fn set_gain(&mut self, gain: f32) -> LiquidResult<()> {
                 if gain <= 0f32 {
-                    return Err("gain must be greater than zero");
+                    return Err(LiquidError::from(ErrorKind::INVALID_VALUE("gain must be greater than zero".to_owned())))
                 }
                 unsafe {
                     $setgain(self.inner, gain);
@@ -114,9 +113,11 @@ macro_rules! agc_xxx_impl {
                 unsafe { $getscale(self.inner) }
             }
 
-            pub fn set_scale(&mut self, scale: f32) -> Result<(), &'static str> {
+            pub fn set_scale(&mut self, scale: f32) -> LiquidResult<()> {
                 if scale <= 0f32 {
-                    return Err("scale must be greater than zero");
+                     return Err(
+                        LiquidError::from(ErrorKind::INVALID_VALUE("scale must be greater than zero".to_owned()))
+                    )
                 }
                 unsafe {
                     $setscale(self.inner, scale);
@@ -257,9 +258,11 @@ agc_xxx_impl!(
 );
 
 impl AgcCrcf {
-    pub fn init(&mut self, input: &[Complex32]) -> Result<(), &'static str> {
+    pub fn init(&mut self, input: &[Complex32]) -> LiquidResult<()> {
         if input.len() == 0 {
-            return Err("number of samples must be greater than zero");
+            return Err(
+                LiquidError::from(ErrorKind::INVALID_VALUE("number of samples must be greater than zero".to_owned()))
+                )
         }
         unsafe {
             raw::agc_crcf_init(self.inner, input.to_ptr() as *mut _, input.len() as c_uint);
@@ -292,9 +295,11 @@ impl AgcCrcf {
 }
 
 impl AgcRrrf {
-    pub fn init(&mut self, input: &mut [f32]) -> Result<(), &'static str> {
+    pub fn init(&mut self, input: &mut [f32]) -> LiquidResult<()> {
         if input.len() == 0 {
-            return Err("number of samples must be greater than zero");
+            return Err(
+                LiquidError::from(ErrorKind::INVALID_VALUE("number of samples must be greater than zero".to_owned()))
+                )
         }
         unsafe {
             raw::agc_rrrf_init(self.inner, input.as_mut_ptr(), input.len() as c_uint);
