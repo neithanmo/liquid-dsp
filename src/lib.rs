@@ -28,7 +28,7 @@ pub use channel::ChannelCccf;
 pub use cvsd::Cvsd;
 pub use fec::{Fec, Interleaver, Packetizer};
 pub use fft::{AsgramCf, AsgramRf, Fft, FftPlan};
-pub use filter::{Firdespm, FiRDes, FiR};
+pub use filter::{Firdespm, Firdes, Fir};
 pub use tvmpch::TvmpchCccf;
 
 pub use enums::{

@@ -1,8 +1,5 @@
-use crate::liquid_dsp_sys as raw;
-use crate::utils::ToCPointerMut;
 
-
-pub trait FilterAnalysis {
+pub trait FilterAnalysis where Self: AsRef<[f32]> {
 
     /// Compute auto-correlation of filter at a specific lag.
     ///
@@ -35,32 +32,3 @@ pub trait FilterAnalysis {
 
 }
 
-impl<T> FilterAnalysis for T where T: AsRef<[f32]> {
-
-    fn auto_corr(&self, lag: usize) -> f32 {
-        unsafe {
-            raw::liquid_filter_autocorr(self.as_ref().as_ptr() as _, self.as_ref().len() as _, lag as _)
-        }
-    }
-
-    fn cross_corr(&self, filter: &Self, lag: usize) -> f32 {
-        unsafe {
-            raw::liquid_filter_crosscorr(self.as_ref().as_ptr() as _, self.as_ref().len() as _, filter.as_ref().as_ptr() as _, filter.as_ref().len() as _, lag as _)
-        }
-    }
-    
-    fn isi(&self, k: usize, m: usize,) ->  (f32, f32) {
-        let mut rms = f32::default();
-        let mut max = f32::default();
-        unsafe {
-            raw::liquid_filter_isi(self.as_ref().as_ptr() as _, k as _, m as _, rms.to_ptr_mut(), max.to_ptr_mut());
-        }
-        (rms, max)
-    }
-    
-    fn energy(&self, fc: f32, nfft: usize) -> f32 {
-        unsafe {
-            raw::liquid_filter_energy(self.as_ref().as_ptr() as _, self.as_ref().len() as _, fc, nfft as _)
-        }
-    }
-}
