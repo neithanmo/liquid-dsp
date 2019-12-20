@@ -1,10 +1,10 @@
-use crate::enums::FirFilterType;
+use filter::FirdesFilterType;
 use crate::liquid_dsp_sys as raw;
 use crate::errors::{LiquidError, ErrorKind};
-use filter::FilterAnalysis;
 
 use crate::utils::ToCPointerMut;
 use crate::LiquidResult;
+pub use filter::FilterAnalysis;
 
 #[derive(Debug)]
 pub struct Fir{
@@ -27,7 +27,7 @@ impl Fir {
     pub fn group_delay(&self,  fc: f32) -> LiquidResult<f32> {
         if fc < -0.5 || fc > 0.5 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
-                format!("fc must be in [0, 0.5]")
+                "fc must be in [0, 0.5]".to_owned()
             )))
         }
         unsafe {
@@ -88,11 +88,11 @@ impl Firdes {
     pub fn estimate_filter_len(df: f32, as_: f32) -> LiquidResult<usize> {
         if df > 0.5 || df <= 0f32 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
-                format!("invalid bandwidth, valid values are (0, 0.5)")
+                "invalid bandwidth, valid values are (0, 0.5)".to_owned()
             )))
         } else if as_ <= 0f32 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
-                format!("invalid stopband level, as > 0"))))
+                "invalid stopband level, as > 0".to_owned())))
         }
         unsafe {
             Ok(raw::estimate_req_filter_len(df, as_) as usize)
@@ -105,7 +105,7 @@ impl Firdes {
     pub fn estimate_filter_as(df: f32, n: usize) -> LiquidResult<f32> {
         if df > 0.5 || df <= 0f32 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
-                format!("invalid bandwidth, valid values are (0, 0.5)")
+                "invalid bandwidth, valid values are (0, 0.5)".to_owned()
             )))
         }
         unsafe {
@@ -120,7 +120,7 @@ impl Firdes {
     pub fn estimate_filter_df(as_: f32, n: usize) -> LiquidResult<f32> {
         if as_ <= 0f32 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
-                format!("stop-band attenuation must be greater than 0")
+                "stop-band attenuation must be greater than 0".to_owned()
             )))
         }
         unsafe {
@@ -135,7 +135,7 @@ impl Firdes {
     ///  m      : symbol delay
     ///  beta   : excess bandwidth factor, _beta in [0,1]
     ///  dt     : fractional sample delay
-    pub fn prototype(type_: FirFilterType, k: usize, m: usize, beta: f32, dt: f32) -> Fir {
+    pub fn prototype(type_: FirdesFilterType, k: usize, m: usize, beta: f32, dt: f32) -> Fir {
         let mut filter = Fir::new(2*k*m + 1);
         unsafe {
             let t: u8 = type_.into();
@@ -159,7 +159,7 @@ impl Firdes {
             )))
         } else if as_ <= 0f32 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
-                format!("as_ stop-band suppression must be greater than zero")
+                "as_ stop-band suppression must be greater than zero".to_owned()
             )))
         }
         let mut filter = Fir::new(2*m + 1);
@@ -274,7 +274,7 @@ impl Firdes {
             )))
         }
         
-        // there seem not to be an FirFilterType for this kinf of filter
+        // there seem not to be an FirdesFilterType for this kinf of filter
         // we use the kaiser, because internally it uses  kaiser window
         let mut filter = Fir::new(n);
         unsafe {
@@ -522,12 +522,13 @@ impl Firdes {
 
 #[cfg(test)]
 mod tests {
-    use super::{Firdes};
-    use crate::filter::FilterAnalysis;
+    use super::*;
+    //use crate::filter::FilterAnalysis;
 
     #[test]
     fn test_firdes_filter_autocorr() {
         let f1 = Firdes::fexp(10, 2, 0.2, 0.5).unwrap();
+        let x = vec![1.5f32;50];
         assert_eq!(f1.auto_corr(5), 6.012687);
     }
     
