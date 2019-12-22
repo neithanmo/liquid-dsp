@@ -5,13 +5,12 @@ use crate::liquid_dsp_sys as raw;
 use crate::utils::{ToCPointerMut, ToCValue};
 use filter::{IirdesBandType, IirdesFilterType, IirdesFormat};
 
-use crate::errors::{LiquidError, ErrorKind};
+use crate::errors::{ErrorKind, LiquidError};
 use crate::LiquidResult;
 
 pub struct IirFiltRrrf {
     inner: raw::iirfilt_rrrf,
 }
-
 
 pub struct IirFiltCrcf {
     inner: raw::iirfilt_crcf,
@@ -20,7 +19,6 @@ pub struct IirFiltCrcf {
 pub struct IirFiltCccf {
     inner: raw::iirfilt_cccf,
 }
-
 
 macro_rules! iirfilt_impl {
     ($obj:ty, ($create_prototype:expr,
@@ -36,16 +34,16 @@ macro_rules! iirfilt_impl {
         $group_delay:expr,
         $destroy:expr)) => {
         impl $obj {
-
-            pub fn create_prototype(ftype: IirdesFilterType,
-                btype: IirdesBandType, 
+            pub fn create_prototype(
+                ftype: IirdesFilterType,
+                btype: IirdesBandType,
                 format: IirdesFormat,
                 order: usize,
                 fc: f32,
                 f0: f32,
                 ap: f32,
-                as_: f32) -> LiquidResult<Self> 
-            {
+                as_: f32,
+            ) -> LiquidResult<Self> {
                 if fc <= 0f32 || fc >= 0.5 {
                     return Err(LiquidError::from(ErrorKind::InvalidValue(
                         "fc must be in (0, 0.5)".to_owned(),
@@ -71,13 +69,19 @@ macro_rules! iirfilt_impl {
                 let btype: u8 = btype.into();
                 let format: u8 = format.into();
                 let filter = unsafe {
-                    $create_prototype(ftype as _, btype as _, format as _, order as _, fc, f0, ap, as_)
+                    $create_prototype(
+                        ftype as _,
+                        btype as _,
+                        format as _,
+                        order as _,
+                        fc,
+                        f0,
+                        ap,
+                        as_,
+                    )
                 };
-            
-                Ok(Self {
-                    inner: filter,
-                })
-            
+
+                Ok(Self { inner: filter })
             }
 
             pub fn create_lowpass(n: usize, fc: f32) -> LiquidResult<Self> {
@@ -91,40 +95,31 @@ macro_rules! iirfilt_impl {
                     )));
                 }
 
-                Ok( Self {
-                    inner: unsafe{
-                        $create_lowpass(n as _, fc)
-                    },
+                Ok(Self {
+                    inner: unsafe { $create_lowpass(n as _, fc) },
                 })
             }
 
             pub fn create_integrator() -> Self {
                 Self {
-                    inner: unsafe {
-                        $create_integrator()
-                    },
+                    inner: unsafe { $create_integrator() },
                 }
             }
 
             pub fn create_differentiator() -> Self {
                 Self {
-                    inner: unsafe {
-                        $create_differentiator()
-                    },
+                    inner: unsafe { $create_differentiator() },
                 }
             }
-            
+
             pub fn create_dc_blocker(alpha: f32) -> LiquidResult<Self> {
                 if alpha <= 0f32 {
                     return Err(LiquidError::from(ErrorKind::InvalidValue(
                         "alpha must be greater than 0".to_owned(),
                     )));
-
                 }
                 Ok(Self {
-                    inner: unsafe {
-                        $create_dc_blocker(alpha)
-                    },
+                    inner: unsafe { $create_dc_blocker(alpha) },
                 })
             }
 
@@ -143,9 +138,7 @@ macro_rules! iirfilt_impl {
                     )));
                 }
                 Ok(Self {
-                    inner: unsafe {
-                        $create_pll(w, zeta, k)
-                    },
+                    inner: unsafe { $create_pll(w, zeta, k) },
                 })
             }
 
@@ -162,9 +155,7 @@ macro_rules! iirfilt_impl {
             }
 
             pub fn len(&self) -> usize {
-                unsafe {
-                    $len(self.inner) as usize
-                }
+                unsafe { $len(self.inner) as usize }
             }
 
             pub fn freq_response(&self, fc: f32) -> Complex32 {
@@ -176,11 +167,8 @@ macro_rules! iirfilt_impl {
             }
 
             pub fn group_delay(&self, fc: f32) -> f32 {
-                unsafe {
-                    $group_delay(self.inner, fc)
-                }
+                unsafe { $group_delay(self.inner, fc) }
             }
-
         }
 
         impl Drop for $obj {
@@ -228,7 +216,6 @@ iirfilt_impl!(
         raw::iirfilt_crcf_destroy
     )
 );
-
 
 iirfilt_impl!(
     IirFiltRrrf,

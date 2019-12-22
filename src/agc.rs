@@ -1,12 +1,12 @@
 use libc::c_uint;
-use std::fmt;
 use num::complex::Complex32;
+use std::fmt;
 
 use crate::enums::AgcSquelchMode;
 use crate::liquid_dsp_sys as raw;
 
-use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 use crate::errors::{ErrorKind, LiquidError};
+use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 use crate::LiquidResult;
 
 pub struct AgcCrcf {
@@ -23,7 +23,7 @@ macro_rules! agc_xxx_impl {
     ($obj:ty, ($create:expr, $reset:expr,
         $lock:expr, $unlock:expr,
         $setband:expr, $getband:expr,
-        $setsignal:expr, $getsignal:expr, 
+        $setsignal:expr, $getsignal:expr,
         $setrssi:expr, $getrssi:expr,
         $setgain:expr, $getgain:expr,
         $setscale:expr, $getscale:expr,
@@ -62,7 +62,9 @@ macro_rules! agc_xxx_impl {
 
             pub fn set_bandwidth(&mut self, b: f32) -> LiquidResult<()> {
                 if b < 0f32 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue("b must be greater than zero".to_owned())))
+                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                        "b must be greater than zero".to_owned(),
+                    )));
                 }
                 unsafe {
                     $setband(self.inner, b);
@@ -80,7 +82,9 @@ macro_rules! agc_xxx_impl {
 
             pub fn set_signal_level(&mut self, level: f32) -> LiquidResult<()> {
                 if level <= 0f32 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue("level must be greater than zero".to_owned())))
+                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                        "level must be greater than zero".to_owned(),
+                    )));
                 }
                 unsafe {
                     $setsignal(self.inner, level);
@@ -103,7 +107,9 @@ macro_rules! agc_xxx_impl {
 
             pub fn set_gain(&mut self, gain: f32) -> LiquidResult<()> {
                 if gain <= 0f32 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue("gain must be greater than zero".to_owned())))
+                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                        "gain must be greater than zero".to_owned(),
+                    )));
                 }
                 unsafe {
                     $setgain(self.inner, gain);
@@ -117,9 +123,9 @@ macro_rules! agc_xxx_impl {
 
             pub fn set_scale(&mut self, scale: f32) -> LiquidResult<()> {
                 if scale <= 0f32 {
-                     return Err(
-                        LiquidError::from(ErrorKind::InvalidValue("scale must be greater than zero".to_owned()))
-                    )
+                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                        "scale must be greater than zero".to_owned(),
+                    )));
                 }
                 unsafe {
                     $setscale(self.inner, scale);
@@ -262,9 +268,9 @@ agc_xxx_impl!(
 impl AgcCrcf {
     pub fn init(&mut self, input: &[Complex32]) -> LiquidResult<()> {
         if input.len() == 0 {
-            return Err(
-                LiquidError::from(ErrorKind::InvalidValue("number of samples must be greater than zero".to_owned()))
-                )
+            return Err(LiquidError::from(ErrorKind::InvalidValue(
+                "number of samples must be greater than zero".to_owned(),
+            )));
         }
         unsafe {
             raw::agc_crcf_init(self.inner, input.to_ptr() as *mut _, input.len() as c_uint);
@@ -299,9 +305,9 @@ impl AgcCrcf {
 impl AgcRrrf {
     pub fn init(&mut self, input: &mut [f32]) -> LiquidResult<()> {
         if input.len() == 0 {
-            return Err(
-                LiquidError::from(ErrorKind::InvalidValue("number of samples must be greater than zero".to_owned()))
-                )
+            return Err(LiquidError::from(ErrorKind::InvalidValue(
+                "number of samples must be greater than zero".to_owned(),
+            )));
         }
         unsafe {
             raw::agc_rrrf_init(self.inner, input.as_mut_ptr(), input.len() as c_uint);

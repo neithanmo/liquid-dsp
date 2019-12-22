@@ -1,14 +1,18 @@
-pub use self::firdespm::Firdespm;
+pub use self::enums::{
+    FirdesFilterType, FirdespmBtype, FirdespmWtype, IirdesBandType, IirdesFilterType, IirdesFormat,
+};
+pub use self::filter::FilterAnalysis;
 pub use self::firdes::{Fir, Firdes};
-pub use self::iirdes::{Iirdes, Iir};
-pub use self::filter::{FilterAnalysis};
-pub use self::enums::{FirdespmBtype, FirdespmWtype, FirdesFilterType, IirdesFilterType, IirdesBandType, IirdesFormat};
-pub use self::zpk::{Zpk, Butter, Cheby1, Cheby2, Bessel};
+pub use self::firdespm::Firdespm;
+pub use self::iirdes::{Iir, Iirdes};
+pub use self::iirfilt::{IirFiltCccf, IirFiltCrcf, IirFiltRrrf};
 pub use self::transfer::Transfer;
-mod firdespm;
-mod firdes;
-mod iirdes;
-mod filter;
+pub use self::zpk::{BandPass, Bessel, Butter, Cheby1, Cheby2, Ellip, HighPass, LowPass, Zpk};
 mod enums;
-mod zpk;
+mod filter;
+mod firdes;
+mod firdespm;
+mod iirdes;
+mod iirfilt;
 mod transfer;
+mod zpk;

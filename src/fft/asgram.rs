@@ -21,7 +21,7 @@ macro_rules! asgram_xxx_impl {
     ($obj:ty, (
         $create:expr, $reset:expr,
         $setscale:expr, $setdisplay:expr,
-        $print:expr, 
+        $print:expr,
         $destroy:expr)) => {
         impl $obj {
             pub fn create(nfft: u32) -> Result<Self, LiquidError> {

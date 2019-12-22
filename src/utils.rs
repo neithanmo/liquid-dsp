@@ -59,12 +59,12 @@ impl ToCValue for Complex32 {
     }
 }
 
-/*impl ToCValue for f32 {
+impl ToCValue for f32 {
     type Output = Self;
-    fn to_c_value(self) -> Self::Output {
+    fn to_c_value(self) -> f32 {
         self
     }
-} */
+}
 
 impl ToCPointer for f32 {
     type Output = *const f32;

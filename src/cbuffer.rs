@@ -5,9 +5,8 @@ use std::slice;
 
 use crate::errors::{ErrorKind, LiquidError};
 use crate::liquid_dsp_sys as raw;
-use num::complex::Complex32;
-
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
+use num::complex::Complex32;
 
 pub struct CbufferRf {
     inner: raw::cbufferf,

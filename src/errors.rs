@@ -11,7 +11,7 @@ pub enum ErrorKind {
     NullWindowSize, // case window size is == 0
     NonPositiveValue, // case when a value is negative */
     EmptyBuffer,
-    InvalidLength{ description: String},
+    InvalidLength { description: String },
     InvalidCrcScheme,
     InvalidFecScheme,
     InvalidValue(String), // when a value does not fullfill certain restrictions
@@ -23,7 +23,7 @@ impl ErrorKind {
         match self {
             Self::InvalidFecScheme => "cannot validate with FecScheme of type UNKNOWN",
             Self::EmptyBuffer => "Buffer is already empty",
-            Self::InvalidLength{ref description} => description,
+            Self::InvalidLength { ref description } => description,
             Self::InvalidCrcScheme => "cannot validate with CRC type UNKNOWN",
             Self::InvalidValue(ref detail) => detail,
             Self::Unknown => "liquid unknown error",
