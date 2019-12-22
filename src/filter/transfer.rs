@@ -1,6 +1,6 @@
 
 
 pub struct Transfer {
-    a: Vec<f32>,
-    b: Vec<f32>,
+    pub a: Vec<f32>,
+    pub b: Vec<f32>,
 }

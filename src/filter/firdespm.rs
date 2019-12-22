@@ -5,7 +5,7 @@ use std::mem::transmute;
 use crate::liquid_dsp_sys as raw;
 
 use crate::callbacks::Callbacks;
-use crate::enums::{FirdespmBtype, FirdespmWtype};
+use filter::enums::{FirdespmBtype, FirdespmWtype};
 use crate::errors::{ErrorKind, LiquidError};
 use crate::utils::catch;
 
