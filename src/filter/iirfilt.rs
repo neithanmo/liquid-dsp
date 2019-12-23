@@ -1,5 +1,4 @@
 use num::complex::Complex32;
-use std::marker::PhantomData;
 
 use crate::liquid_dsp_sys as raw;
 use crate::utils::{ToCPointerMut, ToCValue};
@@ -234,3 +233,67 @@ iirfilt_impl!(
         raw::iirfilt_rrrf_destroy
     )
 );
+
+impl IirFiltRrrf {
+    pub fn create(a: &[f32], b: &[f32]) -> LiquidResult<Self> {
+        if b.len() == 0 {
+            return Err(LiquidError::from(ErrorKind::InvalidValue(
+                "numerator length cannot be zero".to_owned(),
+            )));
+        }
+        if a.len() == 0 {
+            return Err(LiquidError::from(ErrorKind::InvalidValue(
+                "denominator length cannot be zero".to_owned(),
+            )));
+        }
+
+        Ok(Self {
+            inner: unsafe {
+                raw::iirfilt_rrrf_create(
+                    b.as_ptr() as _,
+                    b.len() as _,
+                    a.as_ptr() as _,
+                    a.len() as _,
+                )
+            },
+        })
+    }
+
+    pub fn create_sos(a: &[f32], b: &[f32]) -> LiquidResult<Self> {
+        if a.len() != b.len() {
+            return Err(LiquidError::from(ErrorKind::InvalidLength {
+                description: "numerator and denominator slices must have the same size".to_owned(),
+            }));
+        } else if a.len() == 0 {
+            return Err(LiquidError::from(ErrorKind::InvalidLength {
+                description: "numerator and denominator lengt cannot be zero".to_owned(),
+            }));
+        } else {
+            Ok(Self {
+                inner: unsafe {
+                    raw::iirfilt_rrrf_create_sos(b.as_ptr() as _, a.as_ptr() as _, a.len() as _)
+                },
+            })
+        }
+    }
+
+    pub fn execute(&self, input: f32) -> f32 {
+        let mut output = 0f32;
+        unsafe {
+            raw::iirfilt_rrrf_execute(self.inner, input, output.to_ptr_mut());
+        }
+        output
+    }
+
+    pub fn execute_block(&self, input: &[f32], output: &mut [f32]) {
+        assert_eq!(input.len(), output.len());
+        unsafe {
+            raw::iirfilt_rrrf_execute_block(
+                self.inner,
+                input.as_ptr() as _,
+                input.len() as _,
+                output.as_mut_ptr(),
+            );
+        }
+    }
+}
