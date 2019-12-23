@@ -1,7 +1,7 @@
 use num::complex::Complex32;
 
 use crate::liquid_dsp_sys as raw;
-use crate::utils::{ToCPointerMut, ToCPointer, ToCValue};
+use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 use filter::{IirdesBandType, IirdesFilterType, IirdesFormat};
 
 use crate::errors::{ErrorKind, LiquidError};
@@ -236,8 +236,8 @@ iirfilt_impl!(
 
 impl IirFiltRrrf {
     /// create iirfilt (infinite impulse response filter) object
-    ///  b      :   numerator, feed-forward coefficients 
-    ///  a      :   denominator, feed-back coefficients 
+    ///  b      :   numerator, feed-forward coefficients
+    ///  a      :   denominator, feed-back coefficients
     pub fn create(a: &[f32], b: &[f32]) -> LiquidResult<Self> {
         if b.len() == 0 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
@@ -278,9 +278,11 @@ impl IirFiltRrrf {
             return Err(LiquidError::from(ErrorKind::InvalidLength {
                 description: "numerator and denominator slices must have the same size".to_owned(),
             }));
-        } else if a.len() == 0 || a.len() < (3 * nsos){
+        } else if a.len() == 0 || a.len() < (3 * nsos) {
             return Err(LiquidError::from(ErrorKind::InvalidLength {
-                description: "numerator and denominator lengt cannot be zero or lesser than 3 * nsos".to_owned(),
+                description:
+                    "numerator and denominator lengt cannot be zero or lesser than 3 * nsos"
+                        .to_owned(),
             }));
         } else {
             Ok(Self {
@@ -318,8 +320,8 @@ impl IirFiltRrrf {
 
 impl IirFiltCrcf {
     /// create iirfilt (infinite impulse response filter) object
-    ///  b      :   numerator, feed-forward coefficients 
-    ///  a      :   denominator, feed-back coefficients 
+    ///  b      :   numerator, feed-forward coefficients
+    ///  a      :   denominator, feed-back coefficients
     pub fn create(a: &[f32], b: &[f32]) -> LiquidResult<Self> {
         if b.len() == 0 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
@@ -360,9 +362,11 @@ impl IirFiltCrcf {
             return Err(LiquidError::from(ErrorKind::InvalidLength {
                 description: "numerator and denominator slices must have the same size".to_owned(),
             }));
-        } else if a.len() == 0 || a.len() < (3 * nsos){
+        } else if a.len() == 0 || a.len() < (3 * nsos) {
             return Err(LiquidError::from(ErrorKind::InvalidLength {
-                description: "numerator and denominator lengt cannot be zero or lesser than 3 * nsos".to_owned(),
+                description:
+                    "numerator and denominator lengt cannot be zero or lesser than 3 * nsos"
+                        .to_owned(),
             }));
         } else {
             Ok(Self {
@@ -376,7 +380,7 @@ impl IirFiltCrcf {
     /// execute iir filter, switching to type-specific function
     ///  input      :   input sample
     pub fn execute(&self, input: Complex32) -> Complex32 {
-        let mut output = Complex32::default(); 
+        let mut output = Complex32::default();
         unsafe {
             raw::iirfilt_crcf_execute(self.inner, input.to_c_value(), output.to_ptr_mut());
         }
@@ -401,10 +405,9 @@ impl IirFiltCrcf {
 }
 
 impl IirFiltCccf {
-
     /// create iirfilt (infinite impulse response filter) object
-    ///  b      :   numerator, feed-forward coefficients 
-    ///  a      :   denominator, feed-back coefficients 
+    ///  b      :   numerator, feed-forward coefficients
+    ///  a      :   denominator, feed-back coefficients
     pub fn create(a: &[Complex32], b: &[Complex32]) -> LiquidResult<Self> {
         if b.len() == 0 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
@@ -445,9 +448,11 @@ impl IirFiltCccf {
             return Err(LiquidError::from(ErrorKind::InvalidLength {
                 description: "numerator and denominator slices must have the same size".to_owned(),
             }));
-        } else if a.len() == 0 || a.len() < (3 * nsos){
+        } else if a.len() == 0 || a.len() < (3 * nsos) {
             return Err(LiquidError::from(ErrorKind::InvalidLength {
-                description: "numerator and denominator length cannot be zero or lesser than 3 * nsos".to_owned(),
+                description:
+                    "numerator and denominator length cannot be zero or lesser than 3 * nsos"
+                        .to_owned(),
             }));
         } else {
             Ok(Self {
@@ -461,7 +466,7 @@ impl IirFiltCccf {
     /// execute iir filter, switching to type-specific function
     ///  input      :   input sample
     pub fn execute(&self, input: Complex32) -> Complex32 {
-        let mut output = Complex32::default(); 
+        let mut output = Complex32::default();
         unsafe {
             raw::iirfilt_cccf_execute(self.inner, input.to_c_value(), output.to_ptr_mut());
         }

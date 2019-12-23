@@ -312,7 +312,6 @@ impl Firdes {
     ///  m      : symbol delay
     ///  beta   : rolloff factor (0 < beta <= 1)
     ///  dt     : fractional sample delay
-    ///  _h      : output coefficient buffer (length: 2*k*m+1)
     pub fn rcos(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if k < 1 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
@@ -545,7 +544,6 @@ impl Firdes {
 #[cfg(test)]
 mod tests {
     use super::*;
-    //use crate::filter::FilterAnalysis;
 
     #[test]
     fn test_firdes_filter_autocorr() {

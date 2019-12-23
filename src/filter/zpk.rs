@@ -127,11 +127,8 @@ impl Zpk<LowPass, Analog, Cheby1> {
     /// the filter order is odd, the single real pole is at the
     /// end of the array.  There are no zeros for the analog
     /// Chebyshev Type I filter.
-    ///  _n      :   filter order
-    ///  _ep     :   epsilon, related to pass-band ripple
-    ///  _za     :   output analog zeros [length:  0]
-    ///  _pa     :   output analog poles [length: _n]
-    ///  _ka     :   output analog gain
+    ///  n      :   filter order
+    ///  ep     :   epsilon, related to pass-band ripple
     pub fn cheby1(n: usize, ep: f32) -> Zpk<LowPass, Analog, Cheby1> {
         let mut f = Self::new(n, Complex32::default());
         unsafe {

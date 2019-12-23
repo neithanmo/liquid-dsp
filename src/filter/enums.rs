@@ -56,7 +56,7 @@ pub enum FirdesFilterType {
     ARKAISER,
     RKAISER,
     RRC,
-    hM3,
+    HM3,
     GMSKTX,
     GMSKRX,
     RFEXP,
