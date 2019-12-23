@@ -1,7 +1,7 @@
 use num::complex::Complex32;
 
 use crate::liquid_dsp_sys as raw;
-use crate::utils::{ToCPointerMut, ToCValue};
+use crate::utils::{ToCPointerMut, ToCPointer, ToCValue};
 use filter::{IirdesBandType, IirdesFilterType, IirdesFormat};
 
 use crate::errors::{ErrorKind, LiquidError};
@@ -235,6 +235,9 @@ iirfilt_impl!(
 );
 
 impl IirFiltRrrf {
+    /// create iirfilt (infinite impulse response filter) object
+    ///  b      :   numerator, feed-forward coefficients 
+    ///  a      :   denominator, feed-back coefficients 
     pub fn create(a: &[f32], b: &[f32]) -> LiquidResult<Self> {
         if b.len() == 0 {
             return Err(LiquidError::from(ErrorKind::InvalidValue(
@@ -259,14 +262,25 @@ impl IirFiltRrrf {
         })
     }
 
-    pub fn create_sos(a: &[f32], b: &[f32]) -> LiquidResult<Self> {
+    /// create iirfilt (infinite impulse response filter) object based
+    /// on second-order sections form
+    ///  b      :   numerator, feed-forward coefficients [size: _nsos x 3]
+    ///  a      :   denominator, feed-back coefficients  [size: _nsos x 3]
+    ///  nsos   :   number of second-order sections
+    ///
+    /// NOTE: The number of second-order sections can be computed from the
+    /// filter's order, n, as such:
+    ///   r = n % 2
+    ///   L = (n-r)/2
+    ///   nsos = L+r
+    pub fn create_sos(a: &[f32], b: &[f32], nsos: usize) -> LiquidResult<Self> {
         if a.len() != b.len() {
             return Err(LiquidError::from(ErrorKind::InvalidLength {
                 description: "numerator and denominator slices must have the same size".to_owned(),
             }));
-        } else if a.len() == 0 {
+        } else if a.len() == 0 || a.len() < (3 * nsos){
             return Err(LiquidError::from(ErrorKind::InvalidLength {
-                description: "numerator and denominator lengt cannot be zero".to_owned(),
+                description: "numerator and denominator lengt cannot be zero or lesser than 3 * nsos".to_owned(),
             }));
         } else {
             Ok(Self {
@@ -285,6 +299,10 @@ impl IirFiltRrrf {
         output
     }
 
+    /// execute the filter on a block of input samples; the
+    /// input and output buffers may be the same
+    ///  input      : pointer to input array [size: _n x 1]
+    ///  output      : pointer to output array [size: _n x 1]
     pub fn execute_block(&self, input: &[f32], output: &mut [f32]) {
         assert_eq!(input.len(), output.len());
         unsafe {
@@ -293,6 +311,175 @@ impl IirFiltRrrf {
                 input.as_ptr() as _,
                 input.len() as _,
                 output.as_mut_ptr(),
+            );
+        }
+    }
+}
+
+impl IirFiltCrcf {
+    /// create iirfilt (infinite impulse response filter) object
+    ///  b      :   numerator, feed-forward coefficients 
+    ///  a      :   denominator, feed-back coefficients 
+    pub fn create(a: &[f32], b: &[f32]) -> LiquidResult<Self> {
+        if b.len() == 0 {
+            return Err(LiquidError::from(ErrorKind::InvalidValue(
+                "numerator length cannot be zero".to_owned(),
+            )));
+        }
+        if a.len() == 0 {
+            return Err(LiquidError::from(ErrorKind::InvalidValue(
+                "denominator length cannot be zero".to_owned(),
+            )));
+        }
+
+        Ok(Self {
+            inner: unsafe {
+                raw::iirfilt_crcf_create(
+                    b.as_ptr() as _,
+                    b.len() as _,
+                    a.as_ptr() as _,
+                    a.len() as _,
+                )
+            },
+        })
+    }
+
+    /// create iirfilt (infinite impulse response filter) object based
+    /// on second-order sections form
+    ///  b      :   numerator, feed-forward coefficients [size: _nsos x 3]
+    ///  a      :   denominator, feed-back coefficients  [size: _nsos x 3]
+    ///  nsos   :   number of second-order sections
+    ///
+    /// NOTE: The number of second-order sections can be computed from the
+    /// filter's order, n, as such:
+    ///   r = n % 2
+    ///   L = (n-r)/2
+    ///   nsos = L+r
+    pub fn create_sos(a: &[f32], b: &[f32], nsos: usize) -> LiquidResult<Self> {
+        if a.len() != b.len() {
+            return Err(LiquidError::from(ErrorKind::InvalidLength {
+                description: "numerator and denominator slices must have the same size".to_owned(),
+            }));
+        } else if a.len() == 0 || a.len() < (3 * nsos){
+            return Err(LiquidError::from(ErrorKind::InvalidLength {
+                description: "numerator and denominator lengt cannot be zero or lesser than 3 * nsos".to_owned(),
+            }));
+        } else {
+            Ok(Self {
+                inner: unsafe {
+                    raw::iirfilt_crcf_create_sos(b.as_ptr() as _, a.as_ptr() as _, a.len() as _)
+                },
+            })
+        }
+    }
+
+    /// execute iir filter, switching to type-specific function
+    ///  input      :   input sample
+    pub fn execute(&self, input: Complex32) -> Complex32 {
+        let mut output = Complex32::default(); 
+        unsafe {
+            raw::iirfilt_crcf_execute(self.inner, input.to_c_value(), output.to_ptr_mut());
+        }
+        output
+    }
+
+    /// execute the filter on a block of input samples; the
+    /// input and output buffers may be the same
+    ///  input      : pointer to input array [size: _n x 1]
+    ///  output      : pointer to output array [size: _n x 1]
+    pub fn execute_block(&self, input: &[Complex32], output: &mut [Complex32]) {
+        assert_eq!(input.len(), output.len());
+        unsafe {
+            raw::iirfilt_crcf_execute_block(
+                self.inner,
+                input.to_ptr() as _,
+                input.len() as _,
+                output.to_ptr_mut(),
+            );
+        }
+    }
+}
+
+impl IirFiltCccf {
+
+    /// create iirfilt (infinite impulse response filter) object
+    ///  b      :   numerator, feed-forward coefficients 
+    ///  a      :   denominator, feed-back coefficients 
+    pub fn create(a: &[Complex32], b: &[Complex32]) -> LiquidResult<Self> {
+        if b.len() == 0 {
+            return Err(LiquidError::from(ErrorKind::InvalidValue(
+                "numerator length cannot be zero".to_owned(),
+            )));
+        }
+        if a.len() == 0 {
+            return Err(LiquidError::from(ErrorKind::InvalidValue(
+                "denominator length cannot be zero".to_owned(),
+            )));
+        }
+
+        Ok(Self {
+            inner: unsafe {
+                raw::iirfilt_cccf_create(
+                    b.to_ptr() as _,
+                    b.len() as _,
+                    a.to_ptr() as _,
+                    a.len() as _,
+                )
+            },
+        })
+    }
+
+    /// create iirfilt (infinite impulse response filter) object based
+    /// on second-order sections form
+    ///  b      :   numerator, feed-forward coefficients [size: _nsos x 3]
+    ///  a      :   denominator, feed-back coefficients  [size: _nsos x 3]
+    ///  nsos   :   number of second-order sections
+    ///
+    /// NOTE: The number of second-order sections can be computed from the
+    /// filter's order, n, as such:
+    ///   r = n % 2
+    ///   L = (n-r)/2
+    ///   nsos = L+r
+    pub fn create_sos(a: &[Complex32], b: &[Complex32], nsos: usize) -> LiquidResult<Self> {
+        if a.len() != b.len() {
+            return Err(LiquidError::from(ErrorKind::InvalidLength {
+                description: "numerator and denominator slices must have the same size".to_owned(),
+            }));
+        } else if a.len() == 0 || a.len() < (3 * nsos){
+            return Err(LiquidError::from(ErrorKind::InvalidLength {
+                description: "numerator and denominator length cannot be zero or lesser than 3 * nsos".to_owned(),
+            }));
+        } else {
+            Ok(Self {
+                inner: unsafe {
+                    raw::iirfilt_cccf_create_sos(b.to_ptr() as _, a.to_ptr() as _, a.len() as _)
+                },
+            })
+        }
+    }
+
+    /// execute iir filter, switching to type-specific function
+    ///  input      :   input sample
+    pub fn execute(&self, input: Complex32) -> Complex32 {
+        let mut output = Complex32::default(); 
+        unsafe {
+            raw::iirfilt_cccf_execute(self.inner, input.to_c_value(), output.to_ptr_mut());
+        }
+        output
+    }
+
+    /// execute the filter on a block of input samples; the
+    /// input and output buffers may be the same
+    ///  input      : pointer to input array [size: _n x 1]
+    ///  output      : pointer to output array [size: _n x 1]
+    pub fn execute_block(&self, input: &[Complex32], output: &mut [Complex32]) {
+        assert_eq!(input.len(), output.len());
+        unsafe {
+            raw::iirfilt_cccf_execute_block(
+                self.inner,
+                input.to_ptr() as _,
+                input.len() as _,
+                output.to_ptr_mut(),
             );
         }
     }
