@@ -45,41 +45,6 @@ impl From<u8> for FirdespmWtype {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
-pub enum FirdesFilterType {
-    UNKNOWN,
-    KAISER,
-    PM,
-    RCOS,
-    FEXP,
-    FSECH,
-    FARCSECH,
-    ARKAISER,
-    RKAISER,
-    RRC,
-    HM3,
-    GMSKTX,
-    GMSKRX,
-    RFEXP,
-    RFSECH,
-    RFARCSECH15,
-}
-
-impl From<FirdesFilterType> for u8 {
-    fn from(value: FirdesFilterType) -> u8 {
-        unsafe { transmute::<FirdesFilterType, u8>(value) }
-    }
-}
-
-impl From<u8> for FirdesFilterType {
-    fn from(value: u8) -> Self {
-        if value > 15 {
-            return Self::UNKNOWN;
-        }
-        unsafe { transmute::<u8, FirdesFilterType>(value) }
-    }
-}
-
-#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum IirdesFilterType {
     BUTTER,
     CHEBY1,
@@ -126,5 +91,31 @@ pub enum IirdesFormat {
 impl From<IirdesFormat> for u8 {
     fn from(value: IirdesFormat) -> u8 {
         unsafe { transmute::<IirdesFormat, u8>(value) }
+    }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+pub enum FirFilterType {
+    UNKNOWN,
+    KAISER, 
+    PM,
+    RCOS, 
+    FEXP, 
+    FSECH,
+    FARCSECH,
+    ARKAISER,
+    RKAISER,
+    RRC,
+    HM3,
+    GMSKTX,
+    GMSKRX,
+    RFEXP,
+    RFSECH,
+    RFARCSECH, 
+}
+
+impl From<FirFilterType> for u8 {
+    fn from(value: FirFilterType) -> u8 {
+        unsafe { transmute::<FirFilterType, u8>(value) }
     }
 }
