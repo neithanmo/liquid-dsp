@@ -95,12 +95,12 @@ impl From<IirdesFormat> for u8 {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
-pub enum FirFilterType {
+pub enum FirdesFilterType {
     UNKNOWN,
-    KAISER, 
+    KAISER,
     PM,
-    RCOS, 
-    FEXP, 
+    RCOS,
+    FEXP,
     FSECH,
     FARCSECH,
     ARKAISER,
@@ -111,11 +111,11 @@ pub enum FirFilterType {
     GMSKRX,
     RFEXP,
     RFSECH,
-    RFARCSECH, 
+    RFARCSECH,
 }
 
-impl From<FirFilterType> for u8 {
-    fn from(value: FirFilterType) -> u8 {
-        unsafe { transmute::<FirFilterType, u8>(value) }
+impl From<FirdesFilterType> for u8 {
+    fn from(value: FirdesFilterType) -> u8 {
+        unsafe { transmute::<FirdesFilterType, u8>(value) }
     }
 }

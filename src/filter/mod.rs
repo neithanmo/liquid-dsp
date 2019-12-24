@@ -1,6 +1,5 @@
 pub use self::enums::{
     FirdesFilterType, FirdespmBtype, FirdespmWtype, IirdesBandType, IirdesFilterType, IirdesFormat,
-    FirFilterType,
 };
 pub use self::filter::FilterAnalysis;
 pub use self::firdes::{Fir, Firdes};

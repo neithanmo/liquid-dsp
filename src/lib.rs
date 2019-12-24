@@ -29,9 +29,9 @@ pub use cvsd::Cvsd;
 pub use fec::{Fec, Interleaver, Packetizer};
 pub use fft::{AsgramCf, AsgramRf, Fft, FftPlan};
 pub use filter::{
-    BandPass, Bessel, Butter, Cheby1, Cheby2, Ellip, Fir, FirHilbt, Firdes, FirdesFilterType,
-    Firdespm, FirdespmBtype, FirdespmWtype, HighPass, IirFiltCccf, IirFiltCrcf, IirFiltRrrf,
-    IirHilbt, LowPass, Zpk,
+    BandPass, Bessel, Butter, Cheby1, Cheby2, Ellip, Fir, FirFiltCccf, FirFiltCrcf, FirFiltRrrf,
+    FirHilbt, Firdes, FirdesFilterType, Firdespm, FirdespmBtype, FirdespmWtype, HighPass,
+    IirFiltCccf, IirFiltCrcf, IirFiltRrrf, IirHilbt, LowPass, Zpk,
 };
 pub use tvmpch::TvmpchCccf;
 
