@@ -32,6 +32,7 @@ pub use filter::{
     BandPass, Bessel, Butter, Cheby1, Cheby2, Ellip, Fir, FirFiltCccf, FirFiltCrcf, FirFiltRrrf,
     FirHilbt, Firdes, FirdesFilterType, Firdespm, FirdespmBtype, FirdespmWtype, HighPass,
     IirFiltCccf, IirFiltCrcf, IirFiltRrrf, IirHilbt, LowPass, Zpk,
+    FftFiltCccf, FftFiltCrcf, FftFiltRrrf,
 };
 pub use tvmpch::TvmpchCccf;
 

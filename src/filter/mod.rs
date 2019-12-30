@@ -8,6 +8,7 @@ pub use self::firfilt::{FirFiltCccf, FirFiltCrcf, FirFiltRrrf};
 pub use self::hilbertf::{FirHilbt, IirHilbt};
 pub use self::iirdes::{Iir, Iirdes};
 pub use self::iirfilt::{IirFiltCccf, IirFiltCrcf, IirFiltRrrf};
+pub use self::fftfilt::{FftFiltCccf, FftFiltCrcf, FftFiltRrrf};
 pub use self::transfer::Transfer;
 pub use self::zpk::{BandPass, Bessel, Butter, Cheby1, Cheby2, Ellip, HighPass, LowPass, Zpk};
 
@@ -19,5 +20,6 @@ mod firfilt;
 mod hilbertf;
 mod iirdes;
 mod iirfilt;
+mod fftfilt;
 mod transfer;
 mod zpk;
