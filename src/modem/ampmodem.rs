@@ -3,7 +3,7 @@ use std::fmt;
 
 use num::complex::Complex32;
 
-use crate::enums::AmpModemType;
+use modem::AmpModemType;
 use crate::liquid_dsp_sys as raw;
 
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
@@ -21,7 +21,7 @@ impl AmpModem {
             Self {
                 inner: raw::ampmodem_create(
                     index,
-                    u32::from(modem_type) as c_uint,
+                    u8::from(modem_type) as c_uint,
                     suppressed_carrier as c_int,
                 ),
                 index,
