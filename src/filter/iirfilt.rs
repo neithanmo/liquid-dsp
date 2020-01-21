@@ -4,7 +4,7 @@ use crate::liquid_dsp_sys as raw;
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 use filter::{IirdesBandType, IirdesFilterType, IirdesFormat};
 
-use crate::errors::{ErrorKind, LiquidError};
+use crate::errors::LiquidError;
 use crate::LiquidResult;
 
 pub struct IirFiltRrrf {
@@ -44,25 +44,25 @@ macro_rules! iirfilt_impl {
                 as_: f32,
             ) -> LiquidResult<Self> {
                 if fc <= 0f32 || fc >= 0.5 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "fc must be in (0, 0.5)".to_owned(),
-                    )));
+                    ));
                 } else if f0 < 0f32 || f0 > 0.5 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "f0 must be in [0, 0.5]".to_owned(),
-                    )));
+                    ));
                 } else if ap <= 0f32 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "ap must be greater than 0".to_owned(),
-                    )));
+                    ));
                 } else if as_ <= 0f32 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "as(stop-band ripple) must be greater than 0".to_owned(),
-                    )));
+                    ));
                 } else if order == 0 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "order must be greater than 0".to_owned(),
-                    )));
+                    ));
                 }
                 let ftype: u8 = ftype.into();
                 let btype: u8 = btype.into();
@@ -85,13 +85,13 @@ macro_rules! iirfilt_impl {
 
             pub fn create_lowpass(n: usize, fc: f32) -> LiquidResult<Self> {
                 if fc <= 0f32 || fc >= 0.5 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "fc must be in (0, 0.5)".to_owned(),
-                    )));
+                    ));
                 } else if n == 0 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "order must be greater than 0".to_owned(),
-                    )));
+                    ));
                 }
 
                 Ok(Self {
@@ -113,9 +113,9 @@ macro_rules! iirfilt_impl {
 
             pub fn create_dc_blocker(alpha: f32) -> LiquidResult<Self> {
                 if alpha <= 0f32 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "alpha must be greater than 0".to_owned(),
-                    )));
+                    ));
                 }
                 Ok(Self {
                     inner: unsafe { $create_dc_blocker(alpha) },
@@ -124,17 +124,17 @@ macro_rules! iirfilt_impl {
 
             pub fn create_pll(w: f32, zeta: f32, k: f32) -> LiquidResult<Self> {
                 if w <= 0f32 || w >= 1.0 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "bandwidth must be in (0, 1.0)".to_owned(),
-                    )));
+                    ));
                 } else if zeta <= 0f32 || zeta >= 1.0 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "damping factor must be in (0, 0.5)".to_owned(),
-                    )));
+                    ));
                 } else if k <= 0f32 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "loop gain must be greater than 0".to_owned(),
-                    )));
+                    ));
                 }
                 Ok(Self {
                     inner: unsafe { $create_pll(w, zeta, k) },
@@ -240,14 +240,14 @@ impl IirFiltRrrf {
     ///  a      :   denominator, feed-back coefficients
     pub fn create(a: &[f32], b: &[f32]) -> LiquidResult<Self> {
         if b.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "numerator length cannot be zero".to_owned(),
-            )));
+            ));
         }
         if a.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "denominator length cannot be zero".to_owned(),
-            )));
+            ));
         }
 
         Ok(Self {
@@ -275,15 +275,15 @@ impl IirFiltRrrf {
     ///   nsos = L+r
     pub fn create_sos(a: &[f32], b: &[f32], nsos: usize) -> LiquidResult<Self> {
         if a.len() != b.len() {
-            return Err(LiquidError::from(ErrorKind::InvalidLength {
+            return Err(LiquidError::InvalidLength {
                 description: "numerator and denominator slices must have the same size".to_owned(),
-            }));
+            });
         } else if a.len() == 0 || a.len() < (3 * nsos) {
-            return Err(LiquidError::from(ErrorKind::InvalidLength {
+            return Err(LiquidError::InvalidLength {
                 description:
                     "numerator and denominator lengt cannot be zero or lesser than 3 * nsos"
                         .to_owned(),
-            }));
+            });
         } else {
             Ok(Self {
                 inner: unsafe {
@@ -324,14 +324,14 @@ impl IirFiltCrcf {
     ///  a      :   denominator, feed-back coefficients
     pub fn create(a: &[f32], b: &[f32]) -> LiquidResult<Self> {
         if b.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "numerator length cannot be zero".to_owned(),
-            )));
+            ));
         }
         if a.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "denominator length cannot be zero".to_owned(),
-            )));
+            ));
         }
 
         Ok(Self {
@@ -359,15 +359,15 @@ impl IirFiltCrcf {
     ///   nsos = L+r
     pub fn create_sos(a: &[f32], b: &[f32], nsos: usize) -> LiquidResult<Self> {
         if a.len() != b.len() {
-            return Err(LiquidError::from(ErrorKind::InvalidLength {
+            return Err(LiquidError::InvalidLength {
                 description: "numerator and denominator slices must have the same size".to_owned(),
-            }));
+            });
         } else if a.len() == 0 || a.len() < (3 * nsos) {
-            return Err(LiquidError::from(ErrorKind::InvalidLength {
+            return Err(LiquidError::InvalidLength {
                 description:
                     "numerator and denominator lengt cannot be zero or lesser than 3 * nsos"
                         .to_owned(),
-            }));
+            });
         } else {
             Ok(Self {
                 inner: unsafe {
@@ -410,14 +410,14 @@ impl IirFiltCccf {
     ///  a      :   denominator, feed-back coefficients
     pub fn create(a: &[Complex32], b: &[Complex32]) -> LiquidResult<Self> {
         if b.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "numerator length cannot be zero".to_owned(),
-            )));
+            ));
         }
         if a.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "denominator length cannot be zero".to_owned(),
-            )));
+            ));
         }
 
         Ok(Self {
@@ -445,15 +445,15 @@ impl IirFiltCccf {
     ///   nsos = L+r
     pub fn create_sos(a: &[Complex32], b: &[Complex32], nsos: usize) -> LiquidResult<Self> {
         if a.len() != b.len() {
-            return Err(LiquidError::from(ErrorKind::InvalidLength {
+            return Err(LiquidError::InvalidLength {
                 description: "numerator and denominator slices must have the same size".to_owned(),
-            }));
+            });
         } else if a.len() == 0 || a.len() < (3 * nsos) {
-            return Err(LiquidError::from(ErrorKind::InvalidLength {
+            return Err(LiquidError::InvalidLength {
                 description:
                     "numerator and denominator length cannot be zero or lesser than 3 * nsos"
                         .to_owned(),
-            }));
+            });
         } else {
             Ok(Self {
                 inner: unsafe {

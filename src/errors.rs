@@ -1,11 +1,7 @@
 use std::error;
 use std::fmt;
 
-pub struct LiquidError {
-    pub(crate) err: ErrorKind,
-}
-
-pub enum ErrorKind {
+pub enum LiquidError {
     /*     FftSize,
     WindowSize, // when window size is higher than FftSize
     NullWindowSize, // case window size is == 0
@@ -18,7 +14,7 @@ pub enum ErrorKind {
     Unknown,
 }
 
-impl ErrorKind {
+impl LiquidError {
     pub(crate) fn as_str(&self) -> &str {
         match self {
             Self::InvalidFecScheme => "cannot validate with FecScheme of type UNKNOWN",
@@ -31,13 +27,13 @@ impl ErrorKind {
     }
 }
 
-impl fmt::Display for ErrorKind {
+impl fmt::Display for LiquidError {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "{}", self.as_str())
     }
 }
 
-impl fmt::Debug for ErrorKind {
+impl fmt::Debug for LiquidError {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             fmt,
@@ -49,26 +45,8 @@ impl fmt::Debug for ErrorKind {
     }
 }
 
-impl fmt::Display for LiquidError {
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.err.fmt(fmt)
-    }
-}
-
-impl fmt::Debug for LiquidError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.err.fmt(f)
-    }
-}
-
-impl From<ErrorKind> for LiquidError {
-    fn from(kind: ErrorKind) -> Self {
-        Self { err: kind }
-    }
-}
-
 impl error::Error for LiquidError {
     fn description(&self) -> &str {
-        self.err.as_str()
+        self.as_str()
     }
 }

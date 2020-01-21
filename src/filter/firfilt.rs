@@ -4,7 +4,7 @@ use crate::liquid_dsp_sys as raw;
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 use filter::FirdesFilterType;
 
-use crate::errors::{ErrorKind, LiquidError};
+use crate::errors::LiquidError;
 use crate::LiquidResult;
 
 pub struct FirFiltRrrf {
@@ -34,9 +34,9 @@ macro_rules! firfilt_impl {
         impl $obj {
             pub fn create_rect(n: usize) -> LiquidResult<Self> {
                 if n == 0 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "filter order must be greater than zero".to_owned(),
-                    )));
+                    ));
                 }
 
                 Ok(Self {
@@ -46,9 +46,9 @@ macro_rules! firfilt_impl {
 
             pub fn create_kaiser(n: usize, fc: f32, as_: f32, mu: f32) -> LiquidResult<Self> {
                 if n == 0 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "filter order must be greater than zero".to_owned(),
-                    )));
+                    ));
                 }
 
                 Ok(Self {
@@ -64,21 +64,21 @@ macro_rules! firfilt_impl {
                 mu: f32,
             ) -> LiquidResult<Self> {
                 if k < 2 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "filter samples/symbol must be greater than 1".to_owned(),
-                    )));
+                    ));
                 } else if m == 0 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "filter delay must be greater than zero".to_owned(),
-                    )));
+                    ));
                 } else if beta < 0f32 || beta > 1.0 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "filter excess bandwith factor must be in [0, 1.0]".to_owned(),
-                    )));
+                    ));
                 } else if mu < -0.5 || mu > 0.5 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "filter fractional sample offser factor must be in [-0.5, 0.5]".to_owned(),
-                    )));
+                    ));
                 } else {
                     let ftype: u8 = ftype.into();
                     Ok(Self {
@@ -89,17 +89,17 @@ macro_rules! firfilt_impl {
 
             pub fn create_notch(m: u16, as_: f32, f0: f32) -> LiquidResult<Self> {
                 if m < 1 || m > 1000 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "filter semi-length must be in [1, 1000]".to_owned(),
-                    )));
+                    ));
                 } else if as_ < 0f32 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "filter prototype stop-band suppression be greater than zero".to_owned(),
-                    )));
+                    ));
                 } else if f0 < -0.5 || f0 > 0.5 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(
+                    return Err(LiquidError::InvalidValue(
                         "filter notch frequency must be in [-0.5, 0.5]".to_owned(),
-                    )));
+                    ));
                 } else {
                     Ok(Self {
                         inner: unsafe { $notch(m as _, as_, f0) },
@@ -198,9 +198,9 @@ impl FirFiltRrrf {
     //  h      :  filter coefficients.
     pub fn create(h: &[f32]) -> LiquidResult<Self> {
         if h.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
-            )));
+            ));
         }
         Ok(Self {
             inner: unsafe { raw::firfilt_rrrf_create(h.as_ptr() as _, h.len() as _) },
@@ -211,9 +211,9 @@ impl FirFiltRrrf {
     //  h      :   new coefficients.
     pub fn recreate(self, h: &[f32]) -> LiquidResult<Self> {
         if h.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
-            )));
+            ));
         }
         unsafe {
             raw::firfilt_rrrf_recreate(self.inner, h.as_ptr() as _, h.len() as _);
@@ -287,9 +287,9 @@ impl FirFiltCrcf {
     //  h      :  filter coefficients.
     pub fn create(h: &[f32]) -> LiquidResult<Self> {
         if h.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
-            )));
+            ));
         }
         Ok(Self {
             inner: unsafe { raw::firfilt_crcf_create(h.as_ptr() as _, h.len() as _) },
@@ -300,9 +300,9 @@ impl FirFiltCrcf {
     //  h      :   new coefficients.
     pub fn recreate(self, h: &[f32]) -> LiquidResult<Self> {
         if h.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
-            )));
+            ));
         }
         unsafe {
             raw::firfilt_crcf_recreate(self.inner, h.as_ptr() as _, h.len() as _);
@@ -376,9 +376,9 @@ impl FirFiltCccf {
     //  h      :  filter coefficients.
     pub fn create(h: &[Complex32]) -> LiquidResult<Self> {
         if h.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
-            )));
+            ));
         }
         Ok(Self {
             inner: unsafe { raw::firfilt_cccf_create(h.to_ptr() as _, h.len() as _) },
@@ -389,9 +389,9 @@ impl FirFiltCccf {
     //  h      :   new coefficients.
     pub fn recreate(self, h: &[Complex32]) -> LiquidResult<Self> {
         if h.len() == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
-            )));
+            ));
         }
         unsafe {
             raw::firfilt_cccf_recreate(self.inner, h.to_ptr() as _, h.len() as _);

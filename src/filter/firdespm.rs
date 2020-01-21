@@ -5,7 +5,7 @@ use std::mem::transmute;
 use crate::liquid_dsp_sys as raw;
 
 use crate::callbacks::Callbacks;
-use crate::errors::{ErrorKind, LiquidError};
+use crate::errors::LiquidError;
 use crate::utils::catch;
 use filter::enums::{FirdespmBtype, FirdespmWtype};
 
@@ -66,13 +66,13 @@ impl<'a> Firdespm<'a> {
         wtype: &Option<&[FirdespmWtype]>,
     ) -> Result<(), LiquidError> {
         if bands.len() == 0 || bands.len() / 2 != num_bands {
-            return Err(LiquidError::from(ErrorKind::InvalidLength {
+            return Err(LiquidError::InvalidLength {
                 description: format!(
                     "bands length: {} valid length: {}",
                     bands.len(),
                     num_bands * 2
                 ),
-            }));
+            });
         }
 
         let invalid = if let Some(w) = wtype {
@@ -91,7 +91,7 @@ impl<'a> Firdespm<'a> {
                 weights.len(),
                 num_bands
             );
-            return Err(LiquidError::from(ErrorKind::InvalidLength { description }));
+            return Err(LiquidError::InvalidLength { description });
         }
 
         Ok(())
@@ -150,13 +150,13 @@ impl<'a> Firdespm<'a> {
         F: FnMut(f64, &mut f64, &mut f64) -> i8 + 'a,
     {
         if num_bands == 0 || num_bands != bands.len() / 2 {
-            return Err(LiquidError::from(ErrorKind::InvalidLength {
+            return Err(LiquidError::InvalidLength {
                 description: format!(
                     "bands length: {} valid length: {}",
                     bands.len(),
                     num_bands * 2
                 ),
-            }));
+            });
         }
         let mut userdata = Callbacks::default();
         userdata.firdespm_callback = Some(Box::new(callback));
@@ -234,13 +234,13 @@ impl<'a> Firdespm<'a> {
     pub fn lowpass(fc: f32, as_: f32, mu: f32, output: &mut [f32]) -> Result<(), LiquidError> {
         assert!(output.len() > 0, "filter length must be greater than zero");
         if mu < -0.5 || mu > 0.5 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "mu out of range [-0.5,0.5]".to_owned(),
-            )));
+            ));
         } else if fc < 0f32 || fc > 0.5 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "cutoff frequency out of range (0, 0.5)".to_owned(),
-            )));
+            ));
         }
         unsafe {
             raw::firdespm_lowpass(output.len() as _, fc, as_, mu, output.as_mut_ptr());

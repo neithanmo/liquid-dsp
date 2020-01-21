@@ -1,7 +1,8 @@
-use crate::errors::{ErrorKind, LiquidError};
 use crate::liquid_dsp_sys as raw;
 
 use crate::LiquidResult;
+use crate::errors::LiquidError;
+
 pub use filter::{FilterAnalysis, IirdesBandType, IirdesFilterType};
 
 pub struct Iir {
@@ -37,9 +38,9 @@ impl Iirdes {
     ///  f0     :   center frequency (band-pass|stop cases only)
     pub fn freq_prewarp(btype: IirdesBandType, fc: f32, f0: f32) -> LiquidResult<f32> {
         if fc <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "fc must  be higher than zero".to_owned(),
-            )));
+            ));
         }
         let btype: u8 = btype.into();
         unsafe { Ok(raw::iirdes_freqprewarp(btype as _, fc, f0)) }
@@ -55,17 +56,17 @@ impl Iirdes {
     ///  K      :   loop gain (1000 suggested)
     pub fn pll_active_lag(w: f32, zeta: f32, k: f32) -> LiquidResult<Iir> {
         if w <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "w must be greater than zero".to_owned(),
-            )));
+            ));
         } else if zeta <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "zeta must be greater than zero".to_owned(),
-            )));
+            ));
         } else if k <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "k must be greater than zero".to_owned(),
-            )));
+            ));
         }
 
         let mut iir = Iir::new(3, 3);
@@ -85,17 +86,17 @@ impl Iirdes {
     ///  K      :   loop gain (1000 suggested)
     pub fn pll_active_pi(w: f32, zeta: f32, k: f32) -> LiquidResult<Iir> {
         if w <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "w must be greater than zero".to_owned(),
-            )));
+            ));
         } else if zeta <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "zeta must be greater than zero".to_owned(),
-            )));
+            ));
         } else if k <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "k must be greater than zero".to_owned(),
-            )));
+            ));
         }
         let mut iir = Iir::new(3, 3);
         unsafe {

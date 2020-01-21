@@ -1,4 +1,4 @@
-use crate::errors::{ErrorKind, LiquidError};
+use crate::errors::LiquidError;
 use crate::liquid_dsp_sys as raw;
 use filter::FirdesFilterType;
 
@@ -24,9 +24,9 @@ impl Fir {
     ///  fc     : frequency at which delay is evaluated (-0.5 < _fc < 0.5)
     pub fn group_delay(&self, fc: f32) -> LiquidResult<f32> {
         if fc < -0.5 || fc > 0.5 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "fc must be in [0, 0.5]".to_owned(),
-            )));
+            ));
         }
         unsafe {
             Ok(raw::fir_group_delay(
@@ -108,13 +108,13 @@ impl Firdes {
     ///  as_    :   stopband suppression level [dB] (_As > 0)
     pub fn estimate_filter_len(df: f32, as_: f32) -> LiquidResult<usize> {
         if df > 0.5 || df <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "invalid bandwidth, valid values are (0, 0.5)".to_owned(),
-            )));
+            ));
         } else if as_ <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "invalid stopband level, as > 0".to_owned(),
-            )));
+            ));
         }
         unsafe { Ok(raw::estimate_req_filter_len(df, as_) as usize) }
     }
@@ -124,9 +124,9 @@ impl Firdes {
     ///  n      :   filter length
     pub fn estimate_filter_as(df: f32, n: usize) -> LiquidResult<f32> {
         if df > 0.5 || df <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "invalid bandwidth, valid values are (0, 0.5)".to_owned(),
-            )));
+            ));
         }
         unsafe { Ok(raw::estimate_req_filter_As(df, n as _)) }
     }
@@ -136,9 +136,9 @@ impl Firdes {
     ///  n      :   filter length
     pub fn estimate_filter_df(as_: f32, n: usize) -> LiquidResult<f32> {
         if as_ <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "stop-band attenuation must be greater than 0".to_owned(),
-            )));
+            ));
         }
         unsafe { Ok(raw::estimate_req_filter_df(as_, n as _)) }
     }
@@ -171,19 +171,19 @@ impl Firdes {
     ///  as_    : stop-band attenuation [dB], _As > 0
     pub fn notch(m: usize, f0: f32, as_: f32) -> LiquidResult<Fir> {
         if m < 1 || m > 1000 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(format!(
+            return Err(LiquidError::InvalidValue(format!(
                 "m: {} out of range [1,1000]",
                 m
-            ))));
+            )));
         } else if f0 < -0.5 || f0 > 0.5 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(format!(
+            return Err(LiquidError::InvalidValue(format!(
                 "notch frequency {} must be in [-0.5,0.5]",
                 f0
-            ))));
-        } else if as_ <= 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
-                "as_ stop-band suppression must be greater than zero".to_owned(),
             )));
+        } else if as_ <= 0f32 {
+            return Err(LiquidError::InvalidValue(
+                "as_ stop-band suppression must be greater than zero".to_owned(),
+            ));
         }
         let mut filter = Fir::new(2 * m + 1);
         unsafe {
@@ -199,17 +199,17 @@ impl Firdes {
     ///  mu     : fractional sample offset, -0.5 < _mu < 0.5
     pub fn kaiser(n: usize, fc: f32, as_: f32, mu: f32) -> LiquidResult<Fir> {
         if mu < -0.5 || mu > 0.5 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "mu out of range [-0.5,0.5]".to_owned(),
-            )));
+            ));
         } else if fc < 0f32 || fc > 0.5 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "cutoff frequency out of range (0, 0.5)".to_owned(),
-            )));
+            ));
         } else if n == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(n);
         unsafe {
@@ -226,21 +226,21 @@ impl Firdes {
     ///  dt     :   filter fractional sample delay
     pub fn rkaiser(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if k < 2 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "k must be at least 2".to_owned(),
-            )));
+            ));
         } else if m < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "m must be at least 1".to_owned(),
-            )));
+            ));
         } else if beta <= 0.0 || beta >= 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in (0,1)".to_owned(),
-            )));
+            ));
         } else if dt < -1.0 || dt > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "dt must be in [-1,1]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new((2 * k * m + 1) as usize);
         unsafe {
@@ -258,21 +258,21 @@ impl Firdes {
     ///  dt     :   filter fractional sample delay
     pub fn arkaiser(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if k < 2 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "k must be at least 2".to_owned(),
-            )));
+            ));
         } else if m < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "m must be at least 1".to_owned(),
-            )));
+            ));
         } else if beta <= 0.0 || beta >= 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in (0,1)".to_owned(),
-            )));
+            ));
         } else if dt < -1.0 || dt > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "dt must be in [-1,1]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new((2 * k * m + 1) as usize);
         unsafe {
@@ -288,13 +288,13 @@ impl Firdes {
     ///  theta  : LoS component angle of arrival
     pub fn doppler(n: usize, fd: f32, k: f32, theta: f32) -> LiquidResult<Fir> {
         if fd <= 0f32 || fd > 0.5 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "fd must be in (0, 0.5)".to_owned(),
-            )));
+            ));
         } else if k < 0f32 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "k must be greater than 0".to_owned(),
-            )));
+            ));
         }
 
         // there seem not to be an FirdesFilterType for this kinf of filter
@@ -314,17 +314,17 @@ impl Firdes {
     ///  dt     : fractional sample delay
     pub fn rcos(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if k < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "k must be greater than 0".to_owned(),
-            )));
+            ));
         } else if m < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "m must be greater than 0".to_owned(),
-            )));
+            ));
         } else if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in [0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {
@@ -340,17 +340,17 @@ impl Firdes {
     //  dt     : fractional sample delay
     pub fn rrcos(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if k < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "k must be greater than 0".to_owned(),
-            )));
+            ));
         } else if m < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "m must be greater than 0".to_owned(),
-            )));
+            ));
         } else if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in [0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {
@@ -361,17 +361,17 @@ impl Firdes {
 
     pub fn hm3(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if k < 2 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "k must be greater than 1".to_owned(),
-            )));
+            ));
         } else if m < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "m must be greater than 0".to_owned(),
-            )));
+            ));
         } else if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in [0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {
@@ -387,17 +387,17 @@ impl Firdes {
     ///  dt     : fractional sample delay
     pub fn gmsktx(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if k < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "k must be greater than 0".to_owned(),
-            )));
+            ));
         } else if m < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "m must be greater than 0".to_owned(),
-            )));
+            ));
         } else if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in [0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {
@@ -413,17 +413,17 @@ impl Firdes {
     ///  dt     : fractional sample delay
     pub fn gmskrx(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if k < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "k must be greater than 0".to_owned(),
-            )));
+            ));
         } else if m < 1 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "m must be greater than 0".to_owned(),
-            )));
+            ));
         } else if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in [0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {
@@ -439,9 +439,9 @@ impl Firdes {
     ///  dt     : fractional sample delay
     pub fn fexp(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in (0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {
@@ -457,9 +457,9 @@ impl Firdes {
     ///  dt     : fractional sample delay
     pub fn rfexp(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in (0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {
@@ -475,9 +475,9 @@ impl Firdes {
     ///  dt     : fractional sample delay
     pub fn fsech(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in (0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {
@@ -493,9 +493,9 @@ impl Firdes {
     ///  dt     : fractional sample delay
     pub fn rfsech(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in (0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {
@@ -511,9 +511,9 @@ impl Firdes {
     ///  dt     : fractional sample delay
     pub fn farcsech(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in (0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {
@@ -529,9 +529,9 @@ impl Firdes {
     ///  dt     : fractional sample delay
     pub fn rfarcsech(k: usize, m: usize, beta: f32, dt: f32) -> LiquidResult<Fir> {
         if beta < 0f32 || beta > 1.0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "beta must be in (0, 1.0]".to_owned(),
-            )));
+            ));
         }
         let mut filter = Fir::new(2 * k * m + 1);
         unsafe {

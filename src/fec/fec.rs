@@ -2,7 +2,7 @@ use libc::{c_uint, c_void};
 use std::ptr;
 
 use crate::enums::FecScheme;
-use crate::errors::{ErrorKind, LiquidError};
+use crate::errors::LiquidError;
 use crate::liquid_dsp_sys as raw;
 pub struct Fec {
     inner: raw::fec,
@@ -20,7 +20,7 @@ impl Fec {
                 });
             }
 
-            Err(LiquidError::from(ErrorKind::InvalidFecScheme))
+            Err(LiquidError::InvalidFecScheme)
         }
     }
 

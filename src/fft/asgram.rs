@@ -3,7 +3,7 @@ use std::str;
 
 use num::complex::Complex32;
 
-use crate::errors::{ErrorKind, LiquidError};
+use crate::errors::LiquidError;
 use crate::liquid_dsp_sys as raw;
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 
@@ -26,10 +26,10 @@ macro_rules! asgram_xxx_impl {
         impl $obj {
             pub fn create(nfft: u32) -> Result<Self, LiquidError> {
                 if nfft < 2 {
-                    return Err(LiquidError::from(ErrorKind::InvalidValue(format!(
+                    return Err(LiquidError::InvalidValue(format!(
                         "nfft size must be at least {}",
                         2
-                    ))));
+                    )));
                 }
                 Ok(Self {
                     inner: unsafe { $create(nfft as _) },

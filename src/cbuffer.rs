@@ -3,7 +3,7 @@ use libc::c_uint;
 use std::fmt;
 use std::slice;
 
-use crate::errors::{ErrorKind, LiquidError};
+use crate::errors::LiquidError;
 use crate::liquid_dsp_sys as raw;
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 use num::complex::Complex32;
@@ -87,7 +87,7 @@ macro_rules! cbuffer_xxx_impl {
 
             pub fn release(&mut self, n: usize) -> Result<(), LiquidError> {
                 if n > self.num_elements as usize {
-                    return Err(LiquidError::from(ErrorKind::EmptyBuffer));
+                    return Err(LiquidError::EmptyBuffer);
                 }
                 unsafe {
                     $release(self.inner, n as c_uint);

@@ -4,7 +4,7 @@ use crate::liquid_dsp_sys as raw;
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 use filter::IirdesFilterType;
 
-use crate::errors::{ErrorKind, LiquidError};
+use crate::errors::LiquidError;
 use crate::LiquidResult;
 
 /// infinite impulse response (IIR) Hilbert transform
@@ -145,9 +145,9 @@ impl IirHilbt {
     ///  as_    : stop-band ripple [dB], as_ > 0
     pub fn create(ftype: IirdesFilterType, n: usize, ap: f32, as_: f32) -> LiquidResult<Self> {
         if n == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "filter order must be greater than 0".to_owned(),
-            )));
+            ));
         }
         let ftype: u8 = ftype.into();
         Ok(Self {
@@ -159,9 +159,9 @@ impl IirHilbt {
     ///  n      : filter order, n > 0
     pub fn create_default(n: usize) -> LiquidResult<Self> {
         if n == 0 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "filter order must be greater than 0".to_owned(),
-            )));
+            ));
         }
         Ok(Self {
             inner: unsafe { raw::iirhilbf_create_default(n as _) },
@@ -185,9 +185,9 @@ impl FirHilbt {
     ///  as_    : stop-band ripple [dB], as_ > 0
     pub fn create(m: u32, as_: f32) -> LiquidResult<Self> {
         if m < 2 {
-            return Err(LiquidError::from(ErrorKind::InvalidValue(
+            return Err(LiquidError::InvalidValue(
                 "filter order must be greater than 0".to_owned(),
-            )));
+            ));
         }
         Ok(Self {
             inner: unsafe { raw::firhilbf_create(m as _, as_) },

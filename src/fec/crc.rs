@@ -1,7 +1,7 @@
 use std::ffi::{CString, NulError};
 
 use crate::enums::CrcScheme;
-use crate::errors::{ErrorKind, LiquidError};
+use crate::errors::LiquidError;
 
 use crate::liquid_dsp_sys as raw;
 
@@ -29,7 +29,7 @@ impl CrcScheme {
     ///  msg        :   input data message,
     pub fn generate_key<T: AsRef<[u8]>>(&self, msg: T) -> Result<usize, LiquidError> {
         match self {
-            Self::CRC_UNKNOWN => return Err(LiquidError::from(ErrorKind::InvalidCrcScheme)),
+            Self::CRC_UNKNOWN => return Err(LiquidError::InvalidCrcScheme),
             _ => {
                 let i = unsafe {
                     raw::crc_generate_key(
@@ -65,7 +65,7 @@ impl CrcScheme {
         key: usize,
     ) -> Result<bool, LiquidError> {
         match self {
-            Self::CRC_UNKNOWN => return Err(LiquidError::from(ErrorKind::InvalidCrcScheme)),
+            Self::CRC_UNKNOWN => return Err(LiquidError::InvalidCrcScheme),
             _ => unsafe {
                 Ok(raw::crc_validate_message(
                     u8::from(self.clone()) as _,
@@ -81,7 +81,7 @@ impl CrcScheme {
     ///  msg        :   input data message, [size: _n+p x 1], input data message size (excluding key at end)
     pub fn check_key<T: AsRef<[u8]>>(&self, msg: T) -> Result<bool, LiquidError> {
         match self {
-            Self::CRC_UNKNOWN => return Err(LiquidError::from(ErrorKind::InvalidCrcScheme)),
+            Self::CRC_UNKNOWN => return Err(LiquidError::InvalidCrcScheme),
             _ => unsafe {
                 Ok(raw::crc_check_key(
                     u8::from(self.clone()) as _,
@@ -96,7 +96,7 @@ impl CrcScheme {
     pub fn sizeof_key(scheme: CrcScheme) -> Result<usize, LiquidError> {
         unsafe {
             match scheme {
-                Self::CRC_UNKNOWN => return Err(LiquidError::from(ErrorKind::InvalidCrcScheme)),
+                Self::CRC_UNKNOWN => return Err(LiquidError::InvalidCrcScheme),
                 _ => Ok(raw::crc_sizeof_key(u8::from(scheme) as _) as usize),
             }
         }

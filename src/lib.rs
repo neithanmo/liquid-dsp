@@ -5,7 +5,6 @@ extern crate liquid_dsp_sys;
 extern crate num;
 
 mod agc;
-mod ampmodem;
 mod autocorr;
 mod cbuffer;
 mod channel;
@@ -14,6 +13,7 @@ mod fec;
 mod fft;
 mod filter;
 mod tvmpch;
+mod modem;
 
 mod callbacks;
 mod enums;
@@ -21,7 +21,6 @@ mod errors;
 mod utils;
 
 pub use agc::AgcCrcf;
-pub use ampmodem::AmpModem;
 pub use autocorr::{AutoCorrCccf, AutoCorrRrrf};
 pub use cbuffer::{CbufferCf, CbufferRf};
 pub use channel::ChannelCccf;
@@ -36,7 +35,9 @@ pub use filter::{
 };
 pub use tvmpch::TvmpchCccf;
 
-pub use enums::{AgcSquelchMode, AmpModemType, CrcScheme, FecScheme, FftType};
+pub use modem::{AmpModem, AmpModemType};
+
+pub use enums::{AgcSquelchMode, CrcScheme, FecScheme, FftType};
 
 pub use errors::LiquidError;
 
