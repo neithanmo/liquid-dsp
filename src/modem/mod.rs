@@ -2,7 +2,6 @@ mod ampmodem;
 mod cpfsk;
 mod enums;
 
-pub use modem::ampmodem::AmpModem; 
-pub use modem::enums::AmpModemType;
-pub use modem::cpfsk::{CpfskDem, CpfskMod};
-
+pub use ampmodem::AmpModem;
+pub use cpfsk::{CpfskDem, CpfskMod};
+pub use enums::AmpModemType;

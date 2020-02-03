@@ -1,5 +1,4 @@
 use num::complex::Complex32;
-use std::mem::transmute;
 use std::panic::{self, AssertUnwindSafe};
 
 use crate::liquid_dsp_sys as raw;
@@ -24,28 +23,28 @@ pub(crate) trait ToCValue {
 impl ToCPointer for Complex32 {
     type Output = *const LiquidFloatComplex;
     fn to_ptr(&self) -> Self::Output {
-        unsafe { transmute::<*const Complex32, *const LiquidFloatComplex>(self as *const _) }
+        self as *const _ as _
     }
 }
 
 impl ToCPointerMut for Complex32 {
     type Output = *mut LiquidFloatComplex;
     fn to_ptr_mut(&mut self) -> Self::Output {
-        unsafe { transmute::<*mut Complex32, *mut LiquidFloatComplex>(self as *mut _) }
+        self as *mut _ as _
     }
 }
 
 impl ToCPointer for [Complex32] {
     type Output = *const LiquidFloatComplex;
     fn to_ptr(&self) -> Self::Output {
-        unsafe { transmute::<*const Complex32, *const LiquidFloatComplex>(self.as_ptr()) }
+        self.as_ptr() as _
     }
 }
 
 impl ToCPointerMut for [Complex32] {
     type Output = *mut LiquidFloatComplex;
     fn to_ptr_mut(&mut self) -> Self::Output {
-        unsafe { transmute::<*mut Complex32, *mut LiquidFloatComplex>(self.as_mut_ptr()) }
+        self.as_mut_ptr() as _
     }
 }
 
@@ -84,6 +83,13 @@ impl ToCPointer for [f32] {
     type Output = *const f32;
     fn to_ptr(&self) -> Self::Output {
         self.as_ptr()
+    }
+}
+
+impl ToCPointerMut for [f32] {
+    type Output = *mut f32;
+    fn to_ptr_mut(&mut self) -> Self::Output {
+        self.as_mut_ptr()
     }
 }
 

@@ -12,8 +12,8 @@ mod cvsd;
 mod fec;
 mod fft;
 mod filter;
-mod tvmpch;
 mod modem;
+mod tvmpch;
 
 mod callbacks;
 mod enums;
@@ -28,10 +28,9 @@ pub use cvsd::Cvsd;
 pub use fec::{Fec, Interleaver, Packetizer};
 pub use fft::{AsgramCf, AsgramRf, Fft, FftPlan};
 pub use filter::{
-    FirFiltCrcf, FirFiltRrrf, FirFiltCccf,
-    FirHilbt, FirdesFilterType, Firdespm, FirdespmBtype, FirdespmWtype,
-    IirFiltCccf, IirFiltCrcf, IirFiltRrrf, IirHilbt,
-    FftFiltCccf, FftFiltCrcf, FftFiltRrrf,
+    FftFiltCccf, FftFiltCrcf, FftFiltRrrf, FirFiltCccf, FirFiltCrcf, FirFiltRrrf, FirHilbt,
+    FirInterpCccf, FirInterpCrcf, FirInterpRrrf, FirdesFilterType, Firdespm, FirdespmBtype,
+    FirdespmWtype, IirFiltCccf, IirFiltCrcf, IirFiltRrrf, IirHilbt,
 };
 pub use tvmpch::TvmpchCccf;
 

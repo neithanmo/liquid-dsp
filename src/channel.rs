@@ -50,7 +50,7 @@ impl ChannelCccf {
     ///  h : channel coefficients
     pub fn add_multipath(&mut self, h: &[Complex32]) {
         assert!(
-            h.len() > 0 && h.len() <= 1000,
+            h.is_empty() || h.len() <= 1000,
             "The number of coeficients must be > 0 and <= 1000"
         );
         unsafe {

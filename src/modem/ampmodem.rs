@@ -3,8 +3,8 @@ use std::fmt;
 
 use num::complex::Complex32;
 
-use modem::AmpModemType;
 use crate::liquid_dsp_sys as raw;
+use crate::modem::AmpModemType;
 
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 
@@ -96,7 +96,7 @@ impl fmt::Debug for AmpModem {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "ampmodem [index: {} , type: {:?} , suppressed_carrier: {}]:\n",
+            "ampmodem [index: {} , type: {:?} , suppressed_carrier: {}]:",
             self.index, self.modem_type, self.suppressed_carrier
         )
     }

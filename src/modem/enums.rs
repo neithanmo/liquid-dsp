@@ -1,5 +1,5 @@
-use std::mem::transmute;
 use std::fmt;
+use std::mem::transmute;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum AmpModemType {
@@ -7,7 +7,6 @@ pub enum AmpModemType {
     Usb,
     Lsb,
 }
-
 
 impl From<AmpModemType> for u8 {
     fn from(value: AmpModemType) -> u8 {

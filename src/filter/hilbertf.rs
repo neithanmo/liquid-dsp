@@ -1,8 +1,8 @@
 use num::complex::Complex32;
 
+use crate::filter::IirdesFilterType;
 use crate::liquid_dsp_sys as raw;
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
-use filter::IirdesFilterType;
 
 use crate::errors::LiquidError;
 use crate::LiquidResult;

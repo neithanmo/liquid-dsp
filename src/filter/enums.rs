@@ -23,24 +23,25 @@ impl From<u8> for FirdespmBtype {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
+#[repr(u32)]
 pub enum FirdespmWtype {
     FLATWEIGHT,
     EXPWEIGHT,
     LINWEIGHT,
 }
 
-impl From<FirdespmWtype> for u8 {
-    fn from(value: FirdespmWtype) -> u8 {
-        unsafe { transmute::<FirdespmWtype, u8>(value) }
+impl From<FirdespmWtype> for u32 {
+    fn from(value: FirdespmWtype) -> u32 {
+        unsafe { transmute::<FirdespmWtype, u32>(value) }
     }
 }
 
-impl From<u8> for FirdespmWtype {
-    fn from(value: u8) -> Self {
+impl From<u32> for FirdespmWtype {
+    fn from(value: u32) -> Self {
         if value > 3 {
             unimplemented!();
         }
-        unsafe { transmute::<u8, FirdespmWtype>(value) }
+        unsafe { transmute::<u32, FirdespmWtype>(value) }
     }
 }
 
@@ -96,22 +97,22 @@ impl From<IirdesFormat> for u8 {
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum FirdesFilterType {
-    UNKNOWN,
-    KAISER,
-    PM,
-    RCOS,
-    FEXP,
-    FSECH,
-    FARCSECH,
-    ARKAISER,
-    RKAISER,
-    RRC,
-    HM3,
-    GMSKTX,
-    GMSKRX,
-    RFEXP,
-    RFSECH,
-    RFARCSECH,
+    Unknown,
+    Kaiser,
+    Pm,
+    Rcos,
+    Fexp,
+    Fsech,
+    FarcSech,
+    Arkaiser,
+    Rkaiser,
+    Rrc,
+    Hm3,
+    Gmsktx,
+    Gmskrx,
+    Rfexp,
+    Rfsech,
+    RfarcSech,
 }
 
 impl From<FirdesFilterType> for u8 {

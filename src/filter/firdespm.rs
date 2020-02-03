@@ -6,10 +6,10 @@ use crate::liquid_dsp_sys as raw;
 
 use crate::callbacks::Callbacks;
 use crate::errors::LiquidError;
+use crate::filter::enums::{FirdespmBtype, FirdespmWtype};
 use crate::utils::catch;
-use filter::enums::{FirdespmBtype, FirdespmWtype};
 
-pub extern "C" fn firdespm_callback_f<'a>(
+pub extern "C" fn firdespm_callback_f(
     frecuency: f64,
     userdata: *mut c_void,
     desired: *mut f64,
@@ -65,7 +65,7 @@ impl<'a> Firdespm<'a> {
         weights: &[f32],
         wtype: &Option<&[FirdespmWtype]>,
     ) -> Result<(), LiquidError> {
-        if bands.len() == 0 || bands.len() / 2 != num_bands {
+        if bands.is_empty() || bands.len() / 2 != num_bands {
             return Err(LiquidError::InvalidLength {
                 description: format!(
                     "bands length: {} valid length: {}",
@@ -98,12 +98,12 @@ impl<'a> Firdespm<'a> {
     }
 
     /// create firdespm object
-    ///  _h_len      :   length of filter (number of taps)
-    ///  _bands      :   band edges, f in [0,0.5], [size: _num_bands x 2]
-    ///  _des        :   desired response [size: _num_bands x 1]
-    ///  _weights    :   response weighting [size: _num_bands x 1]
-    ///  _wtype      :   weight types (e.g. LIQUID_FIRDESPM_FLATWEIGHT) [size: _num_bands x 1]
-    ///  _btype      :   band type (e.g. LIQUID_FIRDESPM_BANDPASS)
+    ///  h_len      :   length of filter (number of taps)
+    ///  bands      :   band edges, f in [0,0.5], [size: _num_bands x 2]
+    ///  des        :   desired response [size: _num_bands x 1]
+    ///  weights    :   response weighting [size: _num_bands x 1]
+    ///  wtype      :   weight types (e.g. LIQUID_FIRDESPM_FLATWEIGHT) [size: _num_bands x 1]
+    ///  btype      :   band type (e.g. LIQUID_FIRDESPM_BANDPASS)
     pub fn create(
         h_len: usize,
         num_bands: usize,
@@ -232,7 +232,10 @@ impl<'a> Firdespm<'a> {
     }
 
     pub fn lowpass(fc: f32, as_: f32, mu: f32, output: &mut [f32]) -> Result<(), LiquidError> {
-        assert!(output.len() > 0, "filter length must be greater than zero");
+        assert!(
+            !output.is_empty(),
+            "filter length must be greater than zero"
+        );
         if mu < -0.5 || mu > 0.5 {
             return Err(LiquidError::InvalidValue(
                 "mu out of range [-0.5,0.5]".to_owned(),

@@ -1,8 +1,8 @@
 use num::complex::Complex32;
 
+use crate::filter::FirdesFilterType;
 use crate::liquid_dsp_sys as raw;
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
-use filter::FirdesFilterType;
 
 use crate::errors::LiquidError;
 use crate::LiquidResult;
@@ -197,7 +197,7 @@ impl FirFiltRrrf {
     // Creates firfilt object
     //  h      :  filter coefficients.
     pub fn create(h: &[f32]) -> LiquidResult<Self> {
-        if h.len() == 0 {
+        if h.is_empty() {
             return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
             ));
@@ -210,7 +210,7 @@ impl FirFiltRrrf {
     // re-create firfilt object
     //  h      :   new coefficients.
     pub fn recreate(self, h: &[f32]) -> LiquidResult<Self> {
-        if h.len() == 0 {
+        if h.is_empty() {
             return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
             ));
@@ -286,7 +286,7 @@ impl FirFiltCrcf {
     // Creates firfilt object
     //  h      :  filter coefficients.
     pub fn create(h: &[f32]) -> LiquidResult<Self> {
-        if h.len() == 0 {
+        if h.is_empty() {
             return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
             ));
@@ -299,7 +299,7 @@ impl FirFiltCrcf {
     // re-create firfilt object
     //  h      :   new coefficients.
     pub fn recreate(self, h: &[f32]) -> LiquidResult<Self> {
-        if h.len() == 0 {
+        if h.is_empty() {
             return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
             ));
@@ -375,7 +375,7 @@ impl FirFiltCccf {
     // Creates firfilt object
     //  h      :  filter coefficients.
     pub fn create(h: &[Complex32]) -> LiquidResult<Self> {
-        if h.len() == 0 {
+        if h.is_empty() {
             return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
             ));
@@ -388,7 +388,7 @@ impl FirFiltCccf {
     // re-create firfilt object
     //  h      :   new coefficients.
     pub fn recreate(self, h: &[Complex32]) -> LiquidResult<Self> {
-        if h.len() == 0 {
+        if h.is_empty() {
             return Err(LiquidError::InvalidValue(
                 "filter length must be greater than zero".to_owned(),
             ));

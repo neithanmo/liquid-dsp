@@ -267,7 +267,7 @@ agc_xxx_impl!(
 
 impl AgcCrcf {
     pub fn init(&mut self, input: &[Complex32]) -> LiquidResult<()> {
-        if input.len() == 0 {
+        if input.is_empty() {
             return Err(LiquidError::InvalidValue(
                 "number of samples must be greater than zero".to_owned(),
             ));
@@ -304,7 +304,7 @@ impl AgcCrcf {
 
 impl AgcRrrf {
     pub fn init(&mut self, input: &mut [f32]) -> LiquidResult<()> {
-        if input.len() == 0 {
+        if input.is_empty() {
             return Err(LiquidError::InvalidValue(
                 "number of samples must be greater than zero".to_owned(),
             ));
