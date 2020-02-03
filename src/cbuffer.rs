@@ -300,6 +300,6 @@ mod tests {
         for x in cb.read() {
             println!("{}", x);
         }
-        cb.release(8);
+        cb.release(8).unwrap();
     }
 }

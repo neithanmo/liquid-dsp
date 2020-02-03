@@ -1,12 +1,9 @@
-use libc::{c_int, c_uint};
-use std::fmt;
 
 use num::complex::Complex32;
 
-use modem::AmpModemType;
 use crate::liquid_dsp_sys as raw;
 
-use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
+use crate::utils::{ToCPointer, ToCPointerMut};
 
 use crate::errors::LiquidError;
 use crate::LiquidResult;

@@ -20,7 +20,7 @@ mod enums;
 mod errors;
 mod utils;
 
-pub use agc::AgcCrcf;
+pub use agc::{AgcCrcf, AgcRrrf};
 pub use autocorr::{AutoCorrCccf, AutoCorrRrrf};
 pub use cbuffer::{CbufferCf, CbufferRf};
 pub use channel::ChannelCccf;
@@ -28,14 +28,14 @@ pub use cvsd::Cvsd;
 pub use fec::{Fec, Interleaver, Packetizer};
 pub use fft::{AsgramCf, AsgramRf, Fft, FftPlan};
 pub use filter::{
-    BandPass, Bessel, Butter, Cheby1, Cheby2, Ellip, Fir, FirFiltCccf, FirFiltCrcf, FirFiltRrrf,
-    FirHilbt, Firdes, FirdesFilterType, Firdespm, FirdespmBtype, FirdespmWtype, HighPass,
-    IirFiltCccf, IirFiltCrcf, IirFiltRrrf, IirHilbt, LowPass, Zpk,
+    FirFiltCrcf, FirFiltRrrf, FirFiltCccf,
+    FirHilbt, FirdesFilterType, Firdespm, FirdespmBtype, FirdespmWtype,
+    IirFiltCccf, IirFiltCrcf, IirFiltRrrf, IirHilbt,
     FftFiltCccf, FftFiltCrcf, FftFiltRrrf,
 };
 pub use tvmpch::TvmpchCccf;
 
-pub use modem::{AmpModem, AmpModemType};
+pub use modem::{AmpModem, AmpModemType, CpfskDem, CpfskMod};
 
 pub use enums::{AgcSquelchMode, CrcScheme, FecScheme, FftType};
 

@@ -22,10 +22,10 @@ macro_rules! autocorr_xxx_impl {
         $destroy:expr)) => {
         impl $obj {
             ///  creates and returns an autocorr object with a *window* size of N samples and a *delay* of d samples.
-            pub fn create(N: u32, d: u32) -> Self {
+            pub fn create(n: u32, d: u32) -> Self {
                 Self {
-                    inner: unsafe { $create(N, d) },
-                    window: N,
+                    inner: unsafe { $create(n, d) },
+                    window: n,
                     delay: d,
                 }
             }

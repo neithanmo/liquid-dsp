@@ -2,6 +2,6 @@ mod asgram;
 mod common;
 mod fftplan;
 
-pub use self::asgram::{AsgramCf, AsgramRf};
-pub use self::common::Fft;
-pub use self::fftplan::FftPlan;
+pub use fft::asgram::{AsgramCf, AsgramRf};
+pub use fft::common::Fft;
+pub use fft::fftplan::FftPlan;

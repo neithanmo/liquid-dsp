@@ -1,25 +1,17 @@
-pub use self::enums::{
+pub use filter::enums::{
     FirdesFilterType, FirdespmBtype, FirdespmWtype, IirdesBandType, IirdesFilterType, IirdesFormat,
 };
-pub use self::filter::FilterAnalysis;
-pub use self::firdes::{Fir, Firdes};
-pub use self::firdespm::Firdespm;
-pub use self::firfilt::{FirFiltCccf, FirFiltCrcf, FirFiltRrrf};
-pub use self::hilbertf::{FirHilbt, IirHilbt};
-pub use self::iirdes::{Iir, Iirdes};
-pub use self::iirfilt::{IirFiltCccf, IirFiltCrcf, IirFiltRrrf};
-pub use self::fftfilt::{FftFiltCccf, FftFiltCrcf, FftFiltRrrf};
-pub use self::transfer::Transfer;
-pub use self::zpk::{BandPass, Bessel, Butter, Cheby1, Cheby2, Ellip, HighPass, LowPass, Zpk};
+pub use filter::filter::FilterAnalysis;
+pub use filter::firdespm::Firdespm;
+pub use filter::firfilt::{FirFiltCccf, FirFiltCrcf, FirFiltRrrf};
+pub use filter::hilbertf::{FirHilbt, IirHilbt};
+pub use filter::iirfilt::{IirFiltCccf, IirFiltCrcf, IirFiltRrrf};
+pub use filter::fftfilt::{FftFiltCccf, FftFiltCrcf, FftFiltRrrf};
 
 mod enums;
 mod filter;
-mod firdes;
 mod firdespm;
 mod firfilt;
 mod hilbertf;
-mod iirdes;
 mod iirfilt;
 mod fftfilt;
-mod transfer;
-mod zpk;

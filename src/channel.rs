@@ -31,9 +31,9 @@ impl ChannelCccf {
     /// apply additive white Gausss noise impairment
     ///  N0dB : noise floor power spectral density
     ///  SNRdB: signal-to-noise ratio [dB]
-    pub fn add_awgn(&mut self, N0dB: f32, SNRdB: f32) {
+    pub fn add_awgn(&mut self, n0db: f32, snrdb: f32) {
         unsafe {
-            raw::channel_cccf_add_awgn(self.inner, N0dB, SNRdB);
+            raw::channel_cccf_add_awgn(self.inner, n0db, snrdb);
         }
     }
 

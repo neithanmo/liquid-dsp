@@ -11,6 +11,7 @@ description = """
 Raw bindings to the Liquid-dsp
 High level Rust bindings are available in the `liquid-dsp` crate
 """
+edition = '2018'
 [lib]
 crate-type = ["rlib"]
 

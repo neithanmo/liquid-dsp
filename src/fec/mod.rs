@@ -1,6 +1,6 @@
-pub use self::fec::Fec;
-pub use self::interleaver::Interleaver;
-pub use self::packetizer::Packetizer;
+pub use fec::fec::Fec;
+pub use fec::interleaver::Interleaver;
+pub use fec::packetizer::Packetizer;
 
 mod crc;
 mod fec;
