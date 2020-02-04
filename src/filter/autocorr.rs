@@ -19,9 +19,14 @@ pub struct AutoCorrCccf {
 
 macro_rules! autocorr_xxx_impl {
     ($obj:ty, ($create:expr, $reset:expr,
-        $destroy:expr)) => {
+        $destroy:expr,
+        $push:expr, $execute:expr,
+        $block:expr,$energy:expr,
+        $type:ty, $type2:ty)) => {
         impl $obj {
-            ///  creates and returns an autocorr object with a *window* size of N samples and a *delay* of d samples.
+            /// create auto-correlator object                            
+            ///  n    : size of the correlator window         
+            ///  d    : correlator delay [samples]
             pub fn create(n: u32, d: u32) -> Self {
                 Self {
                     inner: unsafe { $create(n, d) },
@@ -35,8 +40,49 @@ macro_rules! autocorr_xxx_impl {
                     $reset(self.inner);
                 }
             }
+
+            /// push sample into auto-correlator object
+            pub fn push(&self, sample: $type2) {
+                unsafe {
+                    $push(self.inner, sample.to_c_value());
+                }
+            }
+
+            /// compute auto-correlation output
+            pub fn execute(&self) -> $type2 {
+                unsafe {
+                    let mut out = <$type2>::default();
+                    $execute(self.inner, out.to_ptr_mut());
+                    out
+                }
+            }
+
+            /// compute auto-correlation on block of samples; the input
+            /// and output arrays may have the same pointer
+            ///  input      :   input array [size: _n x 1]
+            ///  output     :   input array [size: _n x 1]
+            pub fn execute_block(&self, input: &[$type2], output: &mut [$type2]) {
+                assert!(
+                    input.len() == output.len(),
+                    "Input and output buffers with different length"
+                );
+                input
+                    .iter()
+                    .zip(output.iter_mut())
+                    .for_each(|(isample, osample)| {
+                        self.push(*isample);
+                        unsafe {
+                            $execute(self.inner, osample.to_ptr_mut());
+                        }
+                    });
+            }
+
+            pub fn get_energy(&self) -> $type {
+                unsafe { $energy(self.inner) }
+            }
         }
 
+        /// return sum of squares of buffered samples
         impl fmt::Debug for $obj {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(f, "autocorr [{} window, {} delay]", self.window, self.delay)
@@ -58,7 +104,12 @@ autocorr_xxx_impl!(
     (
         raw::autocorr_cccf_create,
         raw::autocorr_cccf_reset,
-        raw::autocorr_cccf_destroy
+        raw::autocorr_cccf_destroy,
+        raw::autocorr_cccf_push,
+        raw::autocorr_cccf_execute,
+        raw::autocorr_cccf_execute_block,
+        raw::autocorr_cccf_get_energy,
+        f32, Complex32
     )
 );
 
@@ -67,81 +118,14 @@ autocorr_xxx_impl!(
     (
         raw::autocorr_rrrf_create,
         raw::autocorr_rrrf_reset,
-        raw::autocorr_rrrf_destroy
+        raw::autocorr_rrrf_destroy,
+        raw::autocorr_rrrf_push,
+        raw::autocorr_rrrf_execute,
+        raw::autocorr_rrrf_execute_block,
+        raw::autocorr_rrrf_get_energy,
+        f32, f32
     )
 );
-
-impl AutoCorrCccf {
-    pub fn push(&self, sample: Complex32) {
-        unsafe {
-            raw::autocorr_cccf_push(self.inner, sample.to_c_value());
-        }
-    }
-
-    pub fn execute(&self) -> Complex32 {
-        unsafe {
-            let mut out = Complex32::default();
-            raw::autocorr_cccf_execute(self.inner, out.to_ptr_mut());
-            out
-        }
-    }
-
-    pub fn execute_block(&self, input: &[Complex32], output: &mut [Complex32]) {
-        assert!(
-            input.len() == output.len(),
-            "Input and output buffers with different length"
-        );
-        input
-            .iter()
-            .zip(output.iter_mut())
-            .for_each(|(isample, osample)| {
-                self.push(*isample);
-                unsafe {
-                    raw::autocorr_cccf_execute(self.inner, osample.to_ptr_mut());
-                }
-            });
-    }
-
-    pub fn get_energy(&self) -> f32 {
-        unsafe { raw::autocorr_cccf_get_energy(self.inner) as f32 }
-    }
-}
-
-impl AutoCorrRrrf {
-    pub fn push(&self, sample: f32) {
-        unsafe {
-            raw::autocorr_rrrf_push(self.inner, sample);
-        }
-    }
-
-    pub fn execute(&self) -> f32 {
-        unsafe {
-            let out = &mut (0.0 as f32) as *mut f32;
-            raw::autocorr_rrrf_execute(self.inner, out);
-            *out
-        }
-    }
-
-    pub fn execute_block(&self, input: &[f32], output: &mut [f32]) {
-        assert!(
-            input.len() == output.len(),
-            "Input and output buffers with different length"
-        );
-        input
-            .iter()
-            .zip(output.iter_mut())
-            .for_each(|(isample, osample)| {
-                self.push(*isample);
-                unsafe {
-                    raw::autocorr_rrrf_execute(self.inner, osample as *mut _);
-                }
-            });
-    }
-
-    pub fn get_energy(&self) -> f32 {
-        unsafe { raw::autocorr_rrrf_get_energy(self.inner) as f32 }
-    }
-}
 
 #[cfg(test)]
 mod tests {

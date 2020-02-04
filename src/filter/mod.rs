@@ -8,7 +8,9 @@ pub use firfilt::{FirFiltCccf, FirFiltCrcf, FirFiltRrrf};
 pub use firinterp::{FirInterpCccf, FirInterpCrcf, FirInterpRrrf};
 pub use hilbertf::{FirHilbt, IirHilbt};
 pub use iirfilt::{IirFiltCccf, IirFiltCrcf, IirFiltRrrf};
+pub use autocorr::{AutoCorrRrrf, AutoCorrCccf};
 
+mod autocorr;
 mod enums;
 mod fftfilt;
 mod filter;

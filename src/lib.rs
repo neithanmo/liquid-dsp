@@ -5,7 +5,6 @@ extern crate liquid_dsp_sys;
 extern crate num;
 
 mod agc;
-mod autocorr;
 mod cbuffer;
 mod channel;
 mod cvsd;
@@ -21,7 +20,6 @@ mod errors;
 mod utils;
 
 pub use agc::{AgcCrcf, AgcRrrf};
-pub use autocorr::{AutoCorrCccf, AutoCorrRrrf};
 pub use cbuffer::{CbufferCf, CbufferRf};
 pub use channel::ChannelCccf;
 pub use cvsd::Cvsd;
@@ -30,7 +28,7 @@ pub use fft::{AsgramCf, AsgramRf, Fft, FftPlan};
 pub use filter::{
     FftFiltCccf, FftFiltCrcf, FftFiltRrrf, FirFiltCccf, FirFiltCrcf, FirFiltRrrf, FirHilbt,
     FirInterpCccf, FirInterpCrcf, FirInterpRrrf, FirdesFilterType, Firdespm, FirdespmBtype,
-    FirdespmWtype, IirFiltCccf, IirFiltCrcf, IirFiltRrrf, IirHilbt,
+    FirdespmWtype, IirFiltCccf, IirFiltCrcf, IirFiltRrrf, IirHilbt,AutoCorrRrrf, AutoCorrCccf
 };
 pub use tvmpch::TvmpchCccf;
 
