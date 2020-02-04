@@ -20,7 +20,8 @@ pub struct AgcRrrf {
 }
 
 macro_rules! agc_xxx_impl {
-    ($obj:ty, ($create:expr, $reset:expr,
+    ($obj:ty, ($create:expr, $init:expr,
+        $reset:expr,
         $lock:expr, $unlock:expr,
         $setband:expr, $getband:expr,
         $setsignal:expr, $getsignal:expr,
@@ -31,13 +32,30 @@ macro_rules! agc_xxx_impl {
         $squelch:expr,$setthres:expr,
         $getthres:expr, $settimeout:expr,
         $gettimeout:expr, $status:expr,
-        $destroy:expr)) => {
+        $execute:expr, $block:expr,
+        $destroy:expr,
+        $type:ty, $type2:ty)) => {
         impl $obj {
             pub fn create() -> Self {
                 Self {
                     inner: unsafe { $create() },
                     is_locked: false,
                 }
+            }
+
+
+            /// initialize internal gain on input array
+            ///  x      : input data array, [size: _n x 1]
+            pub fn init(&mut self, x: &mut[$type2]) -> LiquidResult<()> {
+                if x.is_empty() {
+                    return Err(LiquidError::InvalidValue(
+                        "number of samples must be greater than zero".to_owned(),
+                    ));
+                }
+                unsafe {
+                    $init(self.inner, x.to_ptr_mut(), x.len() as c_uint);
+                }
+                Ok(())
             }
 
             pub fn reset(&mut self) {
@@ -60,10 +78,12 @@ macro_rules! agc_xxx_impl {
                 }
             }
 
+            /// set agc loop bandwidth
+            ///  b     :   bandwidth 0 <= b <= 1.0
             pub fn set_bandwidth(&mut self, b: f32) -> LiquidResult<()> {
-                if b < 0f32 {
+                if b < 0f32 || b > 1f32 {
                     return Err(LiquidError::InvalidValue(
-                        "b must be greater than zero".to_owned(),
+                        "b must be in [0, 1.0]".to_owned(),
                     ));
                 }
                 unsafe {
@@ -72,6 +92,7 @@ macro_rules! agc_xxx_impl {
                 Ok(())
             }
 
+            /// get agc loop bandwidth
             pub fn get_bandwidth(&self) -> f32 {
                 unsafe { $getband(self.inner) }
             }
@@ -91,20 +112,25 @@ macro_rules! agc_xxx_impl {
                 }
                 Ok(())
             }
+
+            /// get estimated signal level (dB)
             pub fn get_rssi(&self) -> f32 {
                 unsafe { $getrssi(self.inner) }
             }
 
+            /// set estimated signal level (dB)
             pub fn set_rssi(&mut self, rssi: f32) {
                 unsafe {
                     $setrssi(self.inner, rssi);
                 }
             }
 
+            /// get internal gain
             pub fn get_gain(&self) -> f32 {
                 unsafe { $getgain(self.inner) }
             }
 
+            /// set internal gain
             pub fn set_gain(&mut self, gain: f32) -> LiquidResult<()> {
                 if gain <= 0f32 {
                     return Err(LiquidError::InvalidValue(
@@ -117,10 +143,12 @@ macro_rules! agc_xxx_impl {
                 Ok(())
             }
 
+            /// get scale
             pub fn get_scale(&self) -> f32 {
                 unsafe { $getscale(self.inner) }
             }
 
+            /// set scale
             pub fn set_scale(&mut self, scale: f32) -> LiquidResult<()> {
                 if scale <= 0f32 {
                     return Err(LiquidError::InvalidValue(
@@ -133,32 +161,40 @@ macro_rules! agc_xxx_impl {
                 Ok(())
             }
 
+            /// enable squelch mode
             pub fn squelch_enable(&mut self) {
                 unsafe {
                     $squelche(self.inner);
                 }
             }
 
+            /// disable squelch mode
             pub fn squelch_disable(&mut self) {
                 unsafe {
                     $squelchd(self.inner);
                 }
             }
 
+            /// is squelch enabled?
             pub fn squelch_is_enabled(&self) -> bool {
                 unsafe { $squelch(self.inner) == 1 }
             }
 
+            /// set squelch threshold
+            ///  th:   threshold for enabling squelch [dB]
             pub fn squelch_set_threshold(&self, th: f32) {
                 unsafe {
                     $setthres(self.inner, th);
                 }
             }
 
+            /// get squelch threshold [dB]
             pub fn squelch_get_threshold(&self) -> f32 {
                 unsafe { $getthres(self.inner) }
             }
 
+            /// set squelch timeout
+            ///  timeout : timeout before enabling squelch [samples]
             pub fn squelch_set_timeout(&self, timeout: u64) {
                 unsafe {
                     $settimeout(self.inner, timeout as c_uint);
@@ -171,6 +207,36 @@ macro_rules! agc_xxx_impl {
 
             pub fn squelch_status(&self) -> AgcSquelchMode {
                 unsafe { AgcSquelchMode::from_bits($status(self.inner) as u8).unwrap() }
+            }
+
+            /// execute automatic gain control loop
+            ///  x      :   input sample
+            /// # Returns
+            /// output sample
+            pub fn execute(&self, x: $type2) -> $type2 {
+                let mut ret = <$type2>::default();
+                unsafe {
+                    $execute(self.inner, x.to_c_value(), ret.to_ptr_mut());
+                    ret
+                }
+            }
+
+            /// execute automatic gain control on block of samples
+            ///  x      : input data array, [size: _n x 1]
+            ///  y      : output data array, [size: _n x 1]
+            pub fn execute_block(&self, x: &[$type2], y: &mut[$type2]) {
+                assert!(
+                    x.len() == y.len(),
+                    "Input and output buffers with different length"
+                );
+                unsafe {
+                    $block(
+                        self.inner,
+                        x.to_ptr() as _,
+                        x.len() as c_uint,
+                        y.to_ptr_mut(),
+                    );
+                }
             }
         }
 
@@ -211,6 +277,7 @@ agc_xxx_impl!(
     AgcCrcf,
     (
         raw::agc_crcf_create,
+        raw::agc_crcf_init,
         raw::agc_crcf_reset,
         raw::agc_crcf_lock,
         raw::agc_crcf_unlock,
@@ -232,7 +299,10 @@ agc_xxx_impl!(
         raw::agc_crcf_squelch_set_timeout,
         raw::agc_crcf_squelch_get_timeout,
         raw::agc_crcf_squelch_get_status,
-        raw::agc_crcf_destroy
+        raw::agc_crcf_execute,
+        raw::agc_crcf_execute_block,
+        raw::agc_crcf_destroy,
+        f32, Complex32
     )
 );
 
@@ -240,6 +310,7 @@ agc_xxx_impl!(
     AgcRrrf,
     (
         raw::agc_rrrf_create,
+        raw::agc_rrrf_init,
         raw::agc_rrrf_reset,
         raw::agc_rrrf_lock,
         raw::agc_rrrf_unlock,
@@ -261,83 +332,12 @@ agc_xxx_impl!(
         raw::agc_rrrf_squelch_set_timeout,
         raw::agc_rrrf_squelch_get_timeout,
         raw::agc_rrrf_squelch_get_status,
-        raw::agc_rrrf_destroy
+        raw::agc_rrrf_execute,
+        raw::agc_rrrf_execute_block,
+        raw::agc_rrrf_destroy,
+        f32, f32
     )
 );
-
-impl AgcCrcf {
-    pub fn init(&mut self, input: &[Complex32]) -> LiquidResult<()> {
-        if input.is_empty() {
-            return Err(LiquidError::InvalidValue(
-                "number of samples must be greater than zero".to_owned(),
-            ));
-        }
-        unsafe {
-            raw::agc_crcf_init(self.inner, input.to_ptr() as *mut _, input.len() as c_uint);
-        }
-        Ok(())
-    }
-
-    pub fn execute(&self, input: Complex32) -> Complex32 {
-        let mut out = Complex32::default();
-        unsafe {
-            raw::agc_crcf_execute(self.inner, input.to_c_value(), out.to_ptr_mut());
-            out
-        }
-    }
-
-    pub fn execute_block(&self, input: &[Complex32], output: &mut [Complex32]) {
-        assert!(
-            input.len() == output.len(),
-            "Input and output buffers with different length"
-        );
-        unsafe {
-            raw::agc_crcf_execute_block(
-                self.inner,
-                input.to_ptr() as *mut _,
-                input.len() as c_uint,
-                output.to_ptr_mut(),
-            );
-        }
-    }
-}
-
-impl AgcRrrf {
-    pub fn init(&mut self, input: &mut [f32]) -> LiquidResult<()> {
-        if input.is_empty() {
-            return Err(LiquidError::InvalidValue(
-                "number of samples must be greater than zero".to_owned(),
-            ));
-        }
-        unsafe {
-            raw::agc_rrrf_init(self.inner, input.as_mut_ptr(), input.len() as c_uint);
-        }
-        Ok(())
-    }
-
-    pub fn execute(&self, input: f32) -> f32 {
-        let ptr = &mut 0f32 as *mut f32;
-        unsafe {
-            raw::agc_rrrf_execute(self.inner, input, ptr);
-            *ptr
-        }
-    }
-
-    pub fn execute_block(&self, input: &mut [f32], output: &mut [f32]) {
-        assert!(
-            input.len() == output.len(),
-            "Input and output buffers with different length"
-        );
-        unsafe {
-            raw::agc_rrrf_execute_block(
-                self.inner,
-                input.as_mut_ptr(),
-                input.len() as c_uint,
-                output.as_mut_ptr(),
-            );
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {
