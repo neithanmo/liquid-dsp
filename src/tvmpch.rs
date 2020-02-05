@@ -5,6 +5,7 @@ use crate::liquid_dsp_sys as raw;
 
 use crate::utils::{ToCPointer, ToCPointerMut, ToCValue};
 
+/// tvmpch : finite impulse response (FIR) filter
 pub struct TvmpchCccf {
     inner: raw::tvmpch_cccf,
 }
