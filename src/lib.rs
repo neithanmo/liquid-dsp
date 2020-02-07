@@ -13,6 +13,7 @@ mod fft;
 mod filter;
 mod modem;
 mod tvmpch;
+mod equalization;
 
 mod callbacks;
 mod enums;
@@ -20,6 +21,7 @@ mod errors;
 mod utils;
 
 pub use agc::{AgcCrcf, AgcRrrf};
+pub use equalization::{EqlmsRrrf, EqlmsCccf};
 pub use cbuffer::{CbufferCf, CbufferRf};
 pub use channel::ChannelCccf;
 pub use cvsd::Cvsd;

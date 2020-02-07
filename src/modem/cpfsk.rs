@@ -1,5 +1,6 @@
-use num::complex::Complex32;
+//! Continuous-Phase Frequency-Shift Keying Modem
 
+use num::complex::Complex32;
 use crate::liquid_dsp_sys as raw;
 
 use crate::utils::{ToCPointer, ToCPointerMut};
